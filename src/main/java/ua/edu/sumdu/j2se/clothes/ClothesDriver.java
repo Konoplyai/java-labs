@@ -39,12 +39,12 @@ public class ClothesDriver {
      * Виводить інформаційну шапку програми.
      */
     public static void printHeader() {
-        System.out.println("Практична робота №7, варіант 1 (Clothes, Pants, Shirts)");
+        System.out.println("Практична робота №8, варіант 1 (ієрархія класів одягу)");
         System.out.println("Виконав: Конопля Іван, група Ін-42/1");
     }
 
     /**
-     * Показує меню та виконує вибрані дії, доки користувач не вибере вихід.
+     * Показує головне меню та виконує вибрані дії, доки користувач не вибере вихід.
      *
      * @param scanner сканер
      * @param items список одягу
@@ -53,29 +53,65 @@ public class ClothesDriver {
         while (true) {
             System.out.println();
             System.out.println("Меню:");
-            System.out.println("1. Створити одяг");
-            System.out.println("2. Створити штани");
-            System.out.println("3. Створити сорочку");
-            System.out.println("4. Показати весь одяг");
-            System.out.println("5. Вихід");
-            int choice = readInt(scanner, "Ваш вибір: ", 1, 5);
+            System.out.println("1. Створити новий об'єкт");
+            System.out.println("2. Вивести інформацію про всі об'єкти");
+            System.out.println("3. Завершити роботу");
+            int choice = readInt(scanner, "Ваш вибір: ", 1, 3);
             switch (choice) {
                 case 1:
-                    addClothes(scanner, items);
+                    createObject(scanner, items);
                     break;
                 case 2:
-                    addPants(scanner, items);
-                    break;
-                case 3:
-                    addShirts(scanner, items);
-                    break;
-                case 4:
                     printAll(items);
                     break;
                 default:
                     System.out.println("Роботу завершено.");
                     return;
             }
+        }
+    }
+
+    /**
+     * Пропонує вибрати тип нового об'єкта, зчитує його дані та додає до списку.
+     * Пункт 0 повертає до головного меню без створення об'єкта.
+     *
+     * @param scanner сканер
+     * @param items список одягу
+     */
+    public static void createObject(Scanner scanner, List<Clothes> items) {
+        System.out.println("Оберіть тип:");
+        System.out.println("1. Одяг");
+        System.out.println("2. Штани");
+        System.out.println("3. Джинси");
+        System.out.println("4. Сорочка");
+        System.out.println("5. Класична сорочка");
+        System.out.println("0. Повернутися до головного меню");
+        int type = readInt(scanner, "Тип: ", 0, 5);
+        if (type == 0) {
+            return;
+        }
+        try {
+            Clothes clothes;
+            switch (type) {
+                case 1:
+                    clothes = readClothes(scanner);
+                    break;
+                case 2:
+                    clothes = readPants(scanner);
+                    break;
+                case 3:
+                    clothes = readJeans(scanner);
+                    break;
+                case 4:
+                    clothes = readShirts(scanner);
+                    break;
+                default:
+                    clothes = readFormalShirt(scanner);
+                    break;
+            }
+            addToList(items, clothes);
+        } catch (InvalidClothesException e) {
+            System.out.println("Помилка: " + e.getMessage() + ". Об'єкт не створено.");
         }
     }
 
@@ -93,52 +129,62 @@ public class ClothesDriver {
     }
 
     /**
-     * Зчитує дані нового одягу та додає його до списку.
-     * Якщо дані некоректні або така річ уже є, річ не додається.
+     * Зчитує дані штанів.
      *
      * @param scanner сканер
-     * @param items список одягу
+     * @return штани
+     * @throws InvalidClothesException якщо дані не пройшли перевірку
      */
-    public static void addClothes(Scanner scanner, List<Clothes> items) {
-        try {
-            addToList(items, readClothes(scanner));
-        } catch (InvalidClothesException e) {
-            System.out.println("Помилка: " + e.getMessage() + ". Річ не додано.");
-        }
+    public static Pants readPants(Scanner scanner) {
+        Clothes base = readClothes(scanner);
+        int waist = readInt(scanner, "  обхват талії, см: ", Pants.MIN_WAIST, Pants.MAX_WAIST);
+        int length = readInt(scanner, "  довжина, см: ", Pants.MIN_LENGTH, Pants.MAX_LENGTH);
+        return new Pants(base, waist, length);
     }
 
     /**
-     * Зчитує дані штанів та додає їх до списку.
+     * Зчитує дані джинсів.
      *
      * @param scanner сканер
-     * @param items список одягу
+     * @return джинси
+     * @throws InvalidClothesException якщо дані не пройшли перевірку
      */
-    public static void addPants(Scanner scanner, List<Clothes> items) {
-        try {
-            Clothes base = readClothes(scanner);
-            int waist = readInt(scanner, "  обхват талії, см: ", Pants.MIN_WAIST, Pants.MAX_WAIST);
-            int length = readInt(scanner, "  довжина, см: ", Pants.MIN_LENGTH, Pants.MAX_LENGTH);
-            addToList(items, new Pants(base, waist, length));
-        } catch (InvalidClothesException e) {
-            System.out.println("Помилка: " + e.getMessage() + ". Штани не додано.");
-        }
+    public static Jeans readJeans(Scanner scanner) {
+        Pants base = readPants(scanner);
+        Fit fit = readFit(scanner, "  крій (" + Fit.list() + "): ");
+        int density = readInt(scanner, "  щільність деніму, унцій: ", Jeans.MIN_DENSITY, Jeans.MAX_DENSITY);
+        return new Jeans(base, fit, density);
     }
 
     /**
-     * Зчитує дані сорочки та додає її до списку.
+     * Зчитує дані сорочки.
      *
      * @param scanner сканер
-     * @param items список одягу
+     * @return сорочка
+     * @throws InvalidClothesException якщо дані не пройшли перевірку
      */
-    public static void addShirts(Scanner scanner, List<Clothes> items) {
-        try {
-            Clothes base = readClothes(scanner);
-            Sleeve sleeve = readSleeve(scanner, "  рукав (" + Sleeve.list() + "): ");
-            int collar = readInt(scanner, "  розмір коміра, см: ", Shirts.MIN_COLLAR, Shirts.MAX_COLLAR);
-            addToList(items, new Shirts(base, sleeve, collar));
-        } catch (InvalidClothesException e) {
-            System.out.println("Помилка: " + e.getMessage() + ". Сорочку не додано.");
+    public static Shirts readShirts(Scanner scanner) {
+        Clothes base = readClothes(scanner);
+        Sleeve sleeve = readSleeve(scanner, "  рукав (" + Sleeve.list() + "): ");
+        int collar = readInt(scanner, "  розмір коміра, см: ", Shirts.MIN_COLLAR, Shirts.MAX_COLLAR);
+        return new Shirts(base, sleeve, collar);
+    }
+
+    /**
+     * Зчитує дані класичної сорочки.
+     *
+     * @param scanner сканер
+     * @return класична сорочка
+     * @throws InvalidClothesException якщо дані не пройшли перевірку
+     */
+    public static FormalShirt readFormalShirt(Scanner scanner) {
+        Shirts base = readShirts(scanner);
+        boolean cufflinks = false;
+        if (base.getSleeve() == Sleeve.LONG) {
+            cufflinks = readYesNo(scanner, "  манжети під запонки (так/ні): ");
         }
+        boolean nonIron = readYesNo(scanner, "  не потребує прасування (так/ні): ");
+        return new FormalShirt(base, cufflinks, nonIron);
     }
 
     /**
@@ -264,6 +310,44 @@ public class ClothesDriver {
             } catch (InvalidClothesException e) {
                 System.out.println("  Помилка: такого розміру немає.");
             }
+        }
+    }
+
+    /**
+     * Зчитує крій джинсів зі списку допустимих.
+     *
+     * @param scanner сканер
+     * @param prompt підказка
+     * @return крій
+     */
+    public static Fit readFit(Scanner scanner, String prompt) {
+        while (true) {
+            String line = readLine(scanner, prompt);
+            try {
+                return Fit.fromString(line);
+            } catch (InvalidClothesException e) {
+                System.out.println("  Помилка: такого крою немає.");
+            }
+        }
+    }
+
+    /**
+     * Зчитує відповідь так/ні.
+     *
+     * @param scanner сканер
+     * @param prompt підказка
+     * @return true для "так", false для "ні"
+     */
+    public static boolean readYesNo(Scanner scanner, String prompt) {
+        while (true) {
+            String line = readLine(scanner, prompt).toLowerCase();
+            if (line.equals("так") || line.equals("т") || line.equals("y")) {
+                return true;
+            }
+            if (line.equals("ні") || line.equals("н") || line.equals("n")) {
+                return false;
+            }
+            System.out.println("  Помилка: введіть так або ні.");
         }
     }
 
