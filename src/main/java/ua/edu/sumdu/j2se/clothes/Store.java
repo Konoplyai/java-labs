@@ -86,27 +86,46 @@ public class Store {
     }
 
     /**
-     * Видаляє з магазину задану кількість товару. Якщо видаляється вся кількість,
-     * товар повністю прибирається зі списку.
+     * Оновлює дані товару: товар, рівний existingObject (equals), замінюється на newObject.
+     * Новий об'єкт отримує UUID старого, кількість і місце в списку не змінюються.
      *
-     * @param cl товар
-     * @param quantity скільки одиниць видалити, від 1 до наявної кількості
-     * @return кількість, що залишилась (0, якщо товар прибрано зі списку)
-     * @throws InvalidClothesException якщо товару немає в магазині або кількість некоректна
+     * @param existingObject товар, який треба змінити
+     * @param newObject нові дані товару (може бути іншого класу ієрархії)
+     * @return true, якщо оновлення виконано; false, якщо такого товару немає в магазині
+     * @throws InvalidClothesException якщо нові дані не задано або такий товар уже є в магазині
      */
-    public int removeClothes(Clothes cl, int quantity) {
-        int index = indexOfExisting(cl);
-        int current = quantities.get(index);
-        if (quantity < 1 || quantity > current) {
-            throw new InvalidClothesException("видалити можна від 1 до " + current + " шт.");
+    public boolean update(Clothes existingObject, Clothes newObject) {
+        if (newObject == null) {
+            throw new InvalidClothesException("нові дані товару не задано");
         }
-        if (quantity == current) {
-            clothes.remove(index);
-            quantities.remove(index);
-            return 0;
+        int index = clothes.indexOf(existingObject);
+        if (index == -1) {
+            return false;
         }
-        quantities.set(index, current - quantity);
-        return current - quantity;
+        for (int i = 0; i < clothes.size(); i++) {
+            if (i != index && clothes.get(i).equals(newObject)) {
+                throw new InvalidClothesException("такий товар уже є в магазині");
+            }
+        }
+        newObject.restoreUuid(clothes.get(index).getUuid());
+        clothes.set(index, newObject);
+        return true;
+    }
+
+    /**
+     * Видаляє товар з магазину разом з усією його кількістю.
+     *
+     * @param existingObject товар, який треба видалити (шукається через equals)
+     * @return true, якщо товар видалено; false, якщо такого товару немає в магазині
+     */
+    public boolean delete(Clothes existingObject) {
+        int index = clothes.indexOf(existingObject);
+        if (index == -1) {
+            return false;
+        }
+        clothes.remove(index);
+        quantities.remove(index);
+        return true;
     }
 
     /**
@@ -122,28 +141,6 @@ public class Store {
             throw new InvalidClothesException("кількість має бути від 1 до " + MAX_QUANTITY);
         }
         quantities.set(index, quantity);
-    }
-
-    /**
-     * Змінює ціну наявного товару. Якщо після зміни товар стане таким самим,
-     * як інший товар магазину, зміна скасовується, щоб у списку не було повторів.
-     *
-     * @param cl товар
-     * @param price нова ціна, грн
-     * @throws InvalidClothesException якщо товару немає, ціна некоректна
-     *                                 або такий товар з новою ціною вже є
-     */
-    public void changePrice(Clothes cl, double price) {
-        Clothes item = clothes.get(indexOfExisting(cl));
-        double oldPrice = item.getPrice();
-        item.setPrice(price);
-        for (Clothes other : clothes) {
-            if (other != item && other.equals(item)) {
-                item.setPrice(oldPrice);
-                throw new InvalidClothesException("такий товар з ціною " + String.format("%.2f", price)
-                        + " грн уже є в магазині");
-            }
-        }
     }
 
     /**

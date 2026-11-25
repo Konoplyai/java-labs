@@ -105,7 +105,7 @@ public class ClothesDriver {
      * Виводить інформаційну шапку програми.
      */
     public static void printHeader() {
-        System.out.println("Практична робота №16, варіант 1 (магазин одягу, UUID)");
+        System.out.println("Практична робота №17, варіант 1 (магазин одягу, модифікація і видалення)");
         System.out.println("Виконав: Конопля Іван, група Ін-42/1");
     }
 
@@ -121,10 +121,10 @@ public class ClothesDriver {
             System.out.println("Меню:");
             System.out.println("1. Пошук товару");
             System.out.println("2. Додати товар");
-            System.out.println("3. Вивести всі товари");
-            System.out.println("4. Вивести відсортовану інформацію про всі товари");
-            System.out.println("5. Редагувати товар");
-            System.out.println("6. Видалити товар");
+            System.out.println("3. Модифікувати товар");
+            System.out.println("4. Видалити товар");
+            System.out.println("5. Вивести всі товари");
+            System.out.println("6. Вивести відсортовану інформацію про всі товари");
             System.out.println("7. Завершити роботу");
             int choice = readInt(scanner, "Ваш вибір: ", 1, 7);
             switch (choice) {
@@ -135,16 +135,16 @@ public class ClothesDriver {
                     createObject(scanner, store);
                     break;
                 case 3:
-                    printAll(store);
+                    modifyObject(scanner, store);
                     break;
                 case 4:
-                    sortMenu(scanner, store);
+                    deleteObject(scanner, store);
                     break;
                 case 5:
-                    editObject(scanner, store);
+                    printAll(store);
                     break;
                 case 6:
-                    deleteObject(scanner, store);
+                    sortMenu(scanner, store);
                     break;
                 default:
                     System.out.println("Роботу завершено.");
@@ -182,28 +182,45 @@ public class ClothesDriver {
     }
 
     /**
-     * Редагування товару: можна змінити ціну або кількість.
+     * Модифікація товару: користувач вибирає товар, атрибут і нове значення.
+     * Новий об'єкт створюється з усіма старими значеннями, крім зміненого, і проходить
+     * ту саму перевірку, що й під час створення, а заміну виконує метод {@link Store#update}.
+     * Окремим пунктом можна змінити кількість товару.
      *
      * @param scanner сканер
      * @param store магазин
      */
-    public static void editObject(Scanner scanner, Store store) {
+    public static void modifyObject(Scanner scanner, Store store) {
         Clothes item = selectItem(scanner, store);
         if (item == null) {
             return;
         }
-        System.out.println("Що змінити:");
-        System.out.println("1. Ціну");
-        System.out.println("2. Кількість");
+        List<String> keys = ClothesRecord.keysFor(item.getClass().getSimpleName());
+        List<String> values = ClothesRecord.toValues(item);
+        int attributes = keys.size() - 2;
+        System.out.println("Оберіть атрибут для зміни:");
+        for (int i = 1; i <= attributes; i++) {
+            System.out.println(i + ". " + getAttributeTitle(keys.get(i)) + " (зараз: "
+                    + formatValue(keys.get(i), values.get(i)) + ")");
+        }
+        System.out.println((attributes + 1) + ". Кількість (зараз: " + store.getQuantity(item) + " шт.)");
         System.out.println("0. Повернутися до головного меню");
-        int choice = readInt(scanner, "Ваш вибір: ", 0, 2);
+        int choice = readInt(scanner, "Атрибут: ", 0, attributes + 1);
+        if (choice == 0) {
+            return;
+        }
         try {
-            if (choice == 1) {
-                store.changePrice(item, readPrice(scanner, "  нова ціна, грн: "));
-                System.out.println("Ціну змінено: " + item);
-            } else if (choice == 2) {
+            if (choice == attributes + 1) {
                 store.setQuantity(item, readInt(scanner, "  нова кількість, шт.: ", 1, Store.MAX_QUANTITY));
                 System.out.println("Кількість змінено: " + item.getName() + ", " + store.getQuantity(item) + " шт.");
+                return;
+            }
+            values.set(choice, readAttribute(scanner, keys.get(choice)));
+            Clothes updated = ClothesRecord.fromValues(values);
+            if (store.update(item, updated)) {
+                System.out.println("Товар змінено: " + updated.getType() + ": " + updated);
+            } else {
+                System.out.println("Товар не знайдено в магазині, зміни не збережено.");
             }
         } catch (InvalidClothesException e) {
             System.out.println("Помилка: " + e.getMessage() + ". Зміни не збережено.");
@@ -211,8 +228,115 @@ public class ClothesDriver {
     }
 
     /**
-     * Видалення товару: користувач вибирає товар і кількість, яку треба прибрати.
-     * Якщо видаляється вся кількість, товар зникає зі списку.
+     * Повертає назву атрибута для меню модифікації.
+     *
+     * @param key ключ поля з {@link ClothesRecord#keysFor(String)}
+     * @return назва українською
+     */
+    public static String getAttributeTitle(String key) {
+        switch (key) {
+            case "name":
+                return "Назва";
+            case "brand":
+                return "Бренд";
+            case "size":
+                return "Розмір";
+            case "color":
+                return "Колір";
+            case "material":
+                return "Матеріал";
+            case "year":
+                return "Рік випуску";
+            case "price":
+                return "Ціна, грн";
+            case "waist":
+                return "Обхват талії, см";
+            case "length":
+                return "Довжина, см";
+            case "fit":
+                return "Крій";
+            case "density":
+                return "Щільність деніму, унцій";
+            case "sleeve":
+                return "Рукав";
+            case "collar":
+                return "Розмір коміра, см";
+            case "cufflinks":
+                return "Манжети під запонки";
+            case "nonIron":
+                return "Не потребує прасування";
+            default:
+                return key;
+        }
+    }
+
+    /**
+     * Перетворює збережене значення атрибута у зрозумілий вигляд для меню.
+     *
+     * @param key ключ поля
+     * @param value значення з {@link ClothesRecord#toValues(Clothes)}
+     * @return значення для виводу
+     */
+    private static String formatValue(String key, String value) {
+        switch (key) {
+            case "material":
+                return Material.fromString(value).getTitle();
+            case "fit":
+                return Fit.fromString(value).getTitle();
+            case "sleeve":
+                return Sleeve.fromString(value).getTitle();
+            case "cufflinks":
+            case "nonIron":
+                return Boolean.parseBoolean(value) ? "так" : "ні";
+            default:
+                return value;
+        }
+    }
+
+    /**
+     * Зчитує нове значення атрибута з перевіркою формату і повертає його текстом.
+     *
+     * @param scanner сканер
+     * @param key ключ поля
+     * @return нове значення
+     */
+    private static String readAttribute(Scanner scanner, String key) {
+        switch (key) {
+            case "size":
+                return readSize(scanner, "  новий розмір (" + Size.list() + "): ").name();
+            case "material":
+                return readMaterial(scanner, "  новий матеріал (" + Material.list() + "): ").name();
+            case "year":
+                return String.valueOf(readInt(scanner, "  новий рік випуску: ", Clothes.MIN_YEAR,
+                        Year.now().getValue()));
+            case "price":
+                return String.valueOf(readPrice(scanner, "  нова ціна, грн: "));
+            case "waist":
+                return String.valueOf(readInt(scanner, "  новий обхват талії, см: ", Pants.MIN_WAIST, Pants.MAX_WAIST));
+            case "length":
+                return String.valueOf(readInt(scanner, "  нова довжина, см: ", Pants.MIN_LENGTH, Pants.MAX_LENGTH));
+            case "fit":
+                return readFit(scanner, "  новий крій (" + Fit.list() + "): ").name();
+            case "density":
+                return String.valueOf(readInt(scanner, "  нова щільність, унцій: ", Jeans.MIN_DENSITY,
+                        Jeans.MAX_DENSITY));
+            case "sleeve":
+                return readSleeve(scanner, "  новий рукав (" + Sleeve.list() + "): ").name();
+            case "collar":
+                return String.valueOf(readInt(scanner, "  новий розмір коміра, см: ", Shirts.MIN_COLLAR,
+                        Shirts.MAX_COLLAR));
+            case "cufflinks":
+                return String.valueOf(readYesNo(scanner, "  манжети під запонки (так/ні): "));
+            case "nonIron":
+                return String.valueOf(readYesNo(scanner, "  не потребує прасування (так/ні): "));
+            default:
+                return readText(scanner, "  нове значення: ");
+        }
+    }
+
+    /**
+     * Видалення товару: користувач вибирає товар і підтверджує дію,
+     * видалення виконує метод {@link Store#delete}.
      *
      * @param scanner сканер
      * @param store магазин
@@ -222,13 +346,15 @@ public class ClothesDriver {
         if (item == null) {
             return;
         }
-        int current = store.getQuantity(item);
-        int quantity = readInt(scanner, "  скільки видалити, шт. (1-" + current + "): ", 1, current);
-        int left = store.removeClothes(item, quantity);
-        if (left == 0) {
+        if (!readYesNo(scanner, "  видалити \"" + item.getName() + "\" (" + store.getQuantity(item)
+                + " шт.)? (так/ні): ")) {
+            System.out.println("Видалення скасовано.");
+            return;
+        }
+        if (store.delete(item)) {
             System.out.println("Товар \"" + item.getName() + "\" видалено з магазину.");
         } else {
-            System.out.println("Видалено " + quantity + " шт., залишилось " + left + " шт.");
+            System.out.println("Товар не знайдено в магазині.");
         }
     }
 
