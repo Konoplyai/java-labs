@@ -17,14 +17,14 @@ class ClothesTest {
      * @return одяг з правильними даними
      */
     private Clothes validClothes() {
-        return new Clothes("Джинси", "Levi's", "M", "синій", "бавовна", 2023, 2199.90);
+        return new Clothes("Джинси", "Levi's", Size.M, "синій", Material.DENIM, 2023, 2199.90);
     }
 
     @Test
     void shouldCreateObjectWithValidData() {
-        Clothes clothes = new Clothes("  Куртка ", "Columbia", "xl", "чорний", "поліестер", 2022, 4599);
+        Clothes clothes = new Clothes("  Куртка ", "Columbia", Size.XL, "чорний", Material.POLYESTER, 2022, 4599);
         assertEquals("Куртка", clothes.getName());
-        assertEquals("XL", clothes.getSize());
+        assertEquals(Size.XL, clothes.getSize());
         assertEquals(2022, clothes.getReleaseYear());
         assertEquals(4599, clothes.getPrice());
     }
@@ -32,15 +32,15 @@ class ClothesTest {
     @Test
     void shouldThrowExceptionWhenInvalidConstructorData() {
         assertThrows(InvalidClothesException.class,
-                () -> new Clothes("", "Levi's", "M", "синій", "бавовна", 2023, 100));
+                () -> new Clothes("", "Levi's", Size.M, "синій", Material.DENIM, 2023, 100));
         assertThrows(InvalidClothesException.class,
-                () -> new Clothes("Джинси", null, "M", "синій", "бавовна", 2023, 100));
+                () -> new Clothes("Джинси", null, Size.M, "синій", Material.DENIM, 2023, 100));
         assertThrows(InvalidClothesException.class,
-                () -> new Clothes("Джинси", "Levi's", "XXXL", "синій", "бавовна", 2023, 100));
+                () -> new Clothes("Джинси", "Levi's", null, "синій", Material.DENIM, 2023, 100));
         assertThrows(InvalidClothesException.class,
-                () -> new Clothes("Джинси", "Levi's", "M", "синій", "бавовна", 1800, 100));
+                () -> new Clothes("Джинси", "Levi's", Size.M, "синій", Material.DENIM, 1800, 100));
         assertThrows(InvalidClothesException.class,
-                () -> new Clothes("Джинси", "Levi's", "M", "синій", "бавовна", 2023, -5));
+                () -> new Clothes("Джинси", "Levi's", Size.M, "синій", Material.DENIM, 2023, -5));
     }
 
     @Test
@@ -57,7 +57,7 @@ class ClothesTest {
         Clothes clothes = validClothes();
         assertThrows(InvalidClothesException.class, () -> clothes.setName("   "));
         assertThrows(InvalidClothesException.class, () -> clothes.setColor(null));
-        assertThrows(InvalidClothesException.class, () -> clothes.setMaterial("a".repeat(51)));
+        assertThrows(InvalidClothesException.class, () -> clothes.setBrand("a".repeat(51)));
         assertEquals("Джинси", clothes.getName());
     }
 
@@ -66,7 +66,8 @@ class ClothesTest {
         Clothes clothes = validClothes();
         assertThrows(InvalidClothesException.class, () -> clothes.setReleaseYear(Clothes.MIN_YEAR - 1));
         assertThrows(InvalidClothesException.class, () -> clothes.setReleaseYear(3000));
-        assertThrows(InvalidClothesException.class, () -> clothes.setSize("42"));
+        assertThrows(InvalidClothesException.class, () -> clothes.setSize(null));
+        assertThrows(InvalidClothesException.class, () -> clothes.setMaterial(null));
     }
 
     @Test

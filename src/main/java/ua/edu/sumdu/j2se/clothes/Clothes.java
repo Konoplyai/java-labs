@@ -8,18 +8,19 @@ import java.util.Objects;
  */
 public class Clothes {
 
-    /** Допустимі розміри. */
-    public static final String[] SIZES = {"XS", "S", "M", "L", "XL", "XXL"};
     /** Найменший допустимий рік випуску. */
     public static final int MIN_YEAR = 1950;
     /** Максимальна довжина текстових полів. */
     public static final int MAX_TEXT_LENGTH = 50;
 
+    /** Скільки об'єктів Clothes було успішно створено за час роботи програми. */
+    private static int createdCount = 0;
+
     private String name;
     private String brand;
-    private String size;
+    private Size size;
     private String color;
-    private String material;
+    private Material material;
     private int releaseYear;
     private double price;
 
@@ -28,15 +29,15 @@ public class Clothes {
      *
      * @param name назва
      * @param brand бренд
-     * @param size розмір (XS, S, M, L, XL, XXL)
+     * @param size розмір
      * @param color колір
      * @param material матеріал
      * @param releaseYear рік випуску
      * @param price ціна, грн
      * @throws InvalidClothesException якщо якесь значення некоректне
      */
-    public Clothes(String name, String brand, String size, String color,
-                   String material, int releaseYear, double price) {
+    public Clothes(String name, String brand, Size size, String color,
+                   Material material, int releaseYear, double price) {
         setName(name);
         setBrand(brand);
         setSize(size);
@@ -44,6 +45,36 @@ public class Clothes {
         setMaterial(material);
         setReleaseYear(releaseYear);
         setPrice(price);
+        createdCount++;
+    }
+
+    /**
+     * Конструктор копіювання: створює новий об'єкт з тими самими значеннями полів.
+     *
+     * @param other одяг, який копіюється
+     * @throws InvalidClothesException якщо other дорівнює null
+     */
+    public Clothes(Clothes other) {
+        if (other == null) {
+            throw new InvalidClothesException("об'єкт для копіювання не задано");
+        }
+        this.name = other.name;
+        this.brand = other.brand;
+        this.size = other.size;
+        this.color = other.color;
+        this.material = other.material;
+        this.releaseYear = other.releaseYear;
+        this.price = other.price;
+        createdCount++;
+    }
+
+    /**
+     * Повертає кількість створених об'єктів (звичайним конструктором і конструктором копіювання).
+     *
+     * @return кількість створених об'єктів
+     */
+    public static int getCreatedCount() {
+        return createdCount;
     }
 
     /**
@@ -89,21 +120,21 @@ public class Clothes {
      *
      * @return розмір
      */
-    public String getSize() {
+    public Size getSize() {
         return size;
     }
 
     /**
      * Задає розмір.
      *
-     * @param size розмір, один з {@link #SIZES} (регістр не важливий)
-     * @throws InvalidClothesException якщо такого розміру немає
+     * @param size розмір, не null
+     * @throws InvalidClothesException якщо розмір не задано
      */
-    public void setSize(String size) {
-        if (!isValidSize(size)) {
-            throw new InvalidClothesException("розмір має бути одним з: " + String.join(", ", SIZES));
+    public void setSize(Size size) {
+        if (size == null) {
+            throw new InvalidClothesException("розмір не задано");
         }
-        this.size = size.trim().toUpperCase();
+        this.size = size;
     }
 
     /**
@@ -130,18 +161,21 @@ public class Clothes {
      *
      * @return матеріал
      */
-    public String getMaterial() {
+    public Material getMaterial() {
         return material;
     }
 
     /**
      * Задає матеріал.
      *
-     * @param material матеріал, не порожній
-     * @throws InvalidClothesException якщо матеріал порожній або задовгий
+     * @param material матеріал, не null
+     * @throws InvalidClothesException якщо матеріал не задано
      */
-    public void setMaterial(String material) {
-        this.material = checkText(material, "матеріал");
+    public void setMaterial(Material material) {
+        if (material == null) {
+            throw new InvalidClothesException("матеріал не задано");
+        }
+        this.material = material;
     }
 
     /**
@@ -190,24 +224,6 @@ public class Clothes {
     }
 
     /**
-     * Перевіряє, чи є такий розмір у списку допустимих.
-     *
-     * @param size розмір
-     * @return true, якщо розмір допустимий
-     */
-    public static boolean isValidSize(String size) {
-        if (size == null) {
-            return false;
-        }
-        for (String s : SIZES) {
-            if (s.equalsIgnoreCase(size.trim())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
      * Перевіряє, що текст не порожній, і прибирає пробіли по краях.
      *
      * @param value текст
@@ -234,7 +250,7 @@ public class Clothes {
     @Override
     public String toString() {
         return "Clothes{назва='" + name + "', бренд='" + brand + "', розмір=" + size
-                + ", колір='" + color + "', матеріал='" + material + "', рік=" + releaseYear
+                + ", колір='" + color + "', матеріал=" + material.getTitle() + ", рік=" + releaseYear
                 + ", ціна=" + String.format("%.2f", price) + " грн}";
     }
 

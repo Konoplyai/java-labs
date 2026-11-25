@@ -4,8 +4,18 @@
 
 Конопля Іван, група Ін-42/1, варіант 1 (клас Clothes).
 
-Збірка:
+- ПР4 (тег `pr4`): клас Clothes, масив об'єктів, Maven, Git
+- ПР5 (тег `pr5`): валідація, InvalidClothesException, меню, JUnit 5
+- ПР6 (тег `pr6`): enum Size і Material, конструктор копіювання, статичний лічильник, агрегація (Wardrobe)
+
+Збірка і тести:
 
 ```
-mvn clean compile
+mvn clean test
+```
+
+Запуск (Windows):
+
+```
+run.cmd
 ```
