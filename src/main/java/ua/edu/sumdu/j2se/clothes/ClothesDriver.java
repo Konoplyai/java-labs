@@ -3,7 +3,9 @@ package ua.edu.sumdu.j2se.clothes;
 import java.io.Console;
 import java.time.Year;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
 /**
@@ -222,8 +224,8 @@ public class ClothesDriver {
 
     /**
      * Виводить усі речі зі спільного списку. Для кожного об'єкта через посилання
-     * типу Clothes викликаються getType() і toString(), а виконується версія
-     * методу з реального класу об'єкта (поліморфізм).
+     * типу Clothes викликаються getType(), toString() і getCareInstructions(),
+     * а виконується версія методу з реального класу об'єкта (поліморфізм).
      *
      * @param items список одягу
      */
@@ -232,22 +234,26 @@ public class ClothesDriver {
             System.out.println("Список порожній.");
             return;
         }
-        int pants = 0;
-        int shirts = 0;
+        Map<String, Integer> byType = new LinkedHashMap<>();
         double total = 0;
         for (int i = 0; i < items.size(); i++) {
             Clothes clothes = items.get(i);
             System.out.println((i + 1) + ". " + clothes.getType() + ": " + clothes);
-            if (clothes instanceof Pants) {
-                pants++;
-            } else if (clothes instanceof Shirts) {
-                shirts++;
-            }
+            System.out.println("   догляд: " + clothes.getCareInstructions());
+            Integer count = byType.get(clothes.getType());
+            byType.put(clothes.getType(), count == null ? 1 : count + 1);
             total += clothes.getPrice();
         }
-        System.out.println("Усього речей: " + items.size() + " (штанів: " + pants + ", сорочок: " + shirts
-                + ", іншого одягу: " + (items.size() - pants - shirts) + "), загальна вартість: "
+        StringBuilder types = new StringBuilder();
+        for (Map.Entry<String, Integer> entry : byType.entrySet()) {
+            if (types.length() > 0) {
+                types.append(", ");
+            }
+            types.append(entry.getKey()).append(" - ").append(entry.getValue());
+        }
+        System.out.println("Усього речей: " + items.size() + ", загальна вартість: "
                 + String.format("%.2f", total) + " грн");
+        System.out.println("За типами: " + types);
     }
 
     /**
