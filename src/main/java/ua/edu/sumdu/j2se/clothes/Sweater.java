@@ -50,6 +50,6 @@ public class Sweater extends Clothes {
      */
     @Override
     public String toString() {
-        return "Sweater{" + baseInfo() + "}";
+        return "Sweater{" + baseInfo() + uuidInfo() + "}";
     }
 }

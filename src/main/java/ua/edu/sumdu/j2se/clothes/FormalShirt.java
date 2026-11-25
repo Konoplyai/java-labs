@@ -147,7 +147,7 @@ public class FormalShirt extends Shirts {
     @Override
     public String toString() {
         return "FormalShirt{" + baseInfo() + ", рукав=" + getSleeve().getTitle() + ", комір=" + getCollar()
-                + " см, запонки=" + (cufflinks ? "так" : "ні") + ", без прасування=" + (nonIron ? "так" : "ні") + "}";
+                + " см, запонки=" + (cufflinks ? "так" : "ні") + ", без прасування=" + (nonIron ? "так" : "ні") + uuidInfo() + "}";
     }
 
     /**

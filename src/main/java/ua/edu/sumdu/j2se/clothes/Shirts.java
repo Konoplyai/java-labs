@@ -123,7 +123,7 @@ public class Shirts extends Clothes {
      */
     @Override
     public String toString() {
-        return "Shirts{" + baseInfo() + ", рукав=" + sleeve.getTitle() + ", комір=" + collar + " см}";
+        return "Shirts{" + baseInfo() + ", рукав=" + sleeve.getTitle() + ", комір=" + collar + " см" + uuidInfo() + "}";
     }
 
     /**

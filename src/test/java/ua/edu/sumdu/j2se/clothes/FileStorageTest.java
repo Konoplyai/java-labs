@@ -82,9 +82,9 @@ class FileStorageTest {
     void repeatedLineShouldIncreaseQuantity() throws IOException {
         Path file = dir.resolve("input.txt");
         Files.write(file, Arrays.asList(
-                "Sweater;Футболка;Nike;M;білий;COTTON;2022;450;3",
-                "Pants;Шорти;Puma;M;сірий;COTTON;2023;700;80;50;1",
-                "Sweater;Футболка;Nike;M;білий;COTTON;2022;450;4"), StandardCharsets.UTF_8);
+                "Sweater;Футболка;Nike;M;білий;COTTON;2022;450;;3",
+                "Pants;Шорти;Puma;M;сірий;COTTON;2023;700;80;50;;1",
+                "Sweater;Футболка;Nike;M;білий;COTTON;2022;450;;4"), StandardCharsets.UTF_8);
         Store store = new Store("Магазин одягу", "м. Суми");
         List<String> errors = new ArrayList<>();
         assertEquals(3, new TextFileStorage(file.toString()).load(store, errors));
@@ -99,20 +99,21 @@ class FileStorageTest {
         Files.write(file, Arrays.asList(
                 "# коментар",
                 "",
-                "Sweater;Футболка;Nike;M;білий;COTTON;2022;450;2",
+                "Sweater;Футболка;Nike;M;білий;COTTON;2022;450;;2",
                 "Hat;Кепка;Nike;S;червоний;COTTON;2022;450;1",
-                "Sweater;Футболка;Nike;XXXL;білий;COTTON;2022;450;1",
-                "Pants;Шорти;Puma;M;сірий;COTTON;2023;abc;80;50;1",
+                "Sweater;Футболка;Nike;XXXL;білий;COTTON;2022;450;;1",
+                "Pants;Шорти;Puma;M;сірий;COTTON;2023;abc;80;50;;1",
                 "Sweater;Футболка;Nike;M;білий;COTTON;2022;450",
-                "Sweater;Футболка;Nike;M;білий;COTTON;2022;450;0",
-                "Sweater;Футболка;Nike;M;білий;COTTON;2022;450;багато",
+                "Sweater;Футболка;Nike;M;білий;COTTON;2022;450;;0",
+                "Sweater;Футболка;Nike;M;білий;COTTON;2022;450;;багато",
+                "Sweater;Футболка;Nike;M;білий;COTTON;2022;450;1-2-3-4-5;1",
                 "Футболка"), StandardCharsets.UTF_8);
         Store store = new Store("Магазин одягу", "м. Суми");
         List<String> errors = new ArrayList<>();
         assertEquals(1, new TextFileStorage(file.toString()).load(store, errors));
         assertEquals(1, store.size());
         assertEquals(2, store.getTotalQuantity());
-        assertEquals(7, errors.size());
+        assertEquals(8, errors.size());
     }
 
     @Test

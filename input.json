@@ -8,6 +8,7 @@
     "material": "WOOL",
     "year": 2021,
     "price": 1299.0,
+    "uuid": "41660bf9-f598-4e34-8cae-adfb2e40fb8a",
     "quantity": 5
   },
   {
@@ -21,6 +22,7 @@
     "price": 1899.0,
     "waist": 80,
     "length": 104,
+    "uuid": "25e73fc3-7656-4931-9f2b-6f8a00575a2c",
     "quantity": 3
   },
   {
@@ -36,6 +38,7 @@
     "length": 102,
     "fit": "SLIM",
     "density": 13,
+    "uuid": "43b76530-c758-4756-896d-34513b416717",
     "quantity": 4
   },
   {
@@ -49,6 +52,7 @@
     "price": 999.0,
     "sleeve": "SHORT",
     "collar": 41,
+    "uuid": "aec583d7-0daa-4177-b538-816712329084",
     "quantity": 6
   },
   {
@@ -64,6 +68,7 @@
     "collar": 40,
     "cufflinks": true,
     "nonIron": false,
+    "uuid": "b6836c1e-649f-429a-af62-d7fa7b88d573",
     "quantity": 2
   }
 ]
