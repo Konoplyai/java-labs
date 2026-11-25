@@ -175,7 +175,9 @@ public class ClothesDriver {
     }
 
     /**
-     * Виводить усі речі через toString().
+     * Виводить усі речі зі спільного списку. Для кожного об'єкта через посилання
+     * типу Clothes викликаються getType() і toString(), а виконується версія
+     * методу з реального класу об'єкта (поліморфізм).
      *
      * @param items список одягу
      */
@@ -184,9 +186,22 @@ public class ClothesDriver {
             System.out.println("Список порожній.");
             return;
         }
+        int pants = 0;
+        int shirts = 0;
+        double total = 0;
         for (int i = 0; i < items.size(); i++) {
-            System.out.println((i + 1) + ". " + items.get(i));
+            Clothes clothes = items.get(i);
+            System.out.println((i + 1) + ". " + clothes.getType() + ": " + clothes);
+            if (clothes instanceof Pants) {
+                pants++;
+            } else if (clothes instanceof Shirts) {
+                shirts++;
+            }
+            total += clothes.getPrice();
         }
+        System.out.println("Усього речей: " + items.size() + " (штанів: " + pants + ", сорочок: " + shirts
+                + ", іншого одягу: " + (items.size() - pants - shirts) + "), загальна вартість: "
+                + String.format("%.2f", total) + " грн");
     }
 
     /**
