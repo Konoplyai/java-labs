@@ -1,17 +1,27 @@
 package ua.edu.sumdu.j2se.clothes;
 
+import java.text.Collator;
 import java.time.Year;
+import java.util.Locale;
 import java.util.Objects;
 
 /**
  * Одяг: назва, бренд, розмір, колір, матеріал, рік випуску та ціна.
+ * Клас абстрактний: створюються лише об'єкти конкретних класів (Sweater, Pants, Jeans, Shirts, FormalShirt).
+ * Об'єкти порівнюються за назвою за українським алфавітом (інтерфейс Comparable).
  */
-public class Clothes {
+public abstract class Clothes implements Comparable<Clothes> {
 
     /** Найменший допустимий рік випуску. */
     public static final int MIN_YEAR = 1950;
     /** Максимальна довжина текстових полів. */
     public static final int MAX_TEXT_LENGTH = 50;
+    /** Порівняння рядків за правилами українського алфавіту без урахування регістру. */
+    private static final Collator COLLATOR = Collator.getInstance(new Locale("uk", "UA"));
+
+    static {
+        COLLATOR.setStrength(Collator.SECONDARY);
+    }
 
     private String name;
     private String brand;
@@ -233,13 +243,11 @@ public class Clothes {
     }
 
     /**
-     * Повертає тип речі для виводу. Класи-нащадки перевизначають цей метод.
+     * Повертає тип речі для виводу. Кожен конкретний клас реалізує цей метод.
      *
      * @return назва типу
      */
-    public String getType() {
-        return "Одяг";
-    }
+    public abstract String getType();
 
     /**
      * Повертає пораду з догляду за річчю залежно від матеріалу.
@@ -275,13 +283,34 @@ public class Clothes {
     }
 
     /**
-     * Повертає опис одягу одним рядком.
+     * Порівнює одяг для сортування. Основний критерій - назва за українським алфавітом
+     * без урахування регістру. Якщо назви однакові, порівнюються бренд, назва класу, ціна,
+     * а в кінці повний опис toString(), тому порядок однозначний для будь-яких об'єктів,
+     * а 0 повертається лише для однакових речей.
      *
-     * @return рядок з усіма полями
+     * @param other інша річ
+     * @return від'ємне число, 0 або додатне число
+     * @throws NullPointerException якщо other дорівнює null
      */
     @Override
-    public String toString() {
-        return "Clothes{" + baseInfo() + "}";
+    public int compareTo(Clothes other) {
+        if (other == null) {
+            throw new NullPointerException("не можна порівнювати з null");
+        }
+        int result = COLLATOR.compare(name, other.name);
+        if (result == 0) {
+            result = COLLATOR.compare(brand, other.brand);
+        }
+        if (result == 0) {
+            result = getClass().getSimpleName().compareTo(other.getClass().getSimpleName());
+        }
+        if (result == 0) {
+            result = Double.compare(price, other.price);
+        }
+        if (result == 0) {
+            result = toString().compareTo(other.toString());
+        }
+        return result;
     }
 
     /**

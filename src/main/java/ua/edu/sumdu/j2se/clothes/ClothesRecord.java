@@ -32,7 +32,7 @@ public final class ClothesRecord {
      * Повертає назви всіх полів для заданого типу в тому порядку,
      * у якому вони записуються у файл.
      *
-     * @param type назва класу (Clothes, Pants, Jeans, Shirts, FormalShirt)
+     * @param type назва класу (Sweater, Pants, Jeans, Shirts, FormalShirt)
      * @return список назв полів
      * @throws InvalidClothesException якщо тип невідомий
      */
@@ -43,7 +43,7 @@ public final class ClothesRecord {
         }
         String[] extra;
         switch (type == null ? "" : type) {
-            case "Clothes":
+            case "Sweater":
                 extra = new String[0];
                 break;
             case "Pants":
@@ -125,7 +125,7 @@ public final class ClothesRecord {
             throw new InvalidClothesException("для типу " + type + " потрібно " + keys.size()
                     + " значень, а задано " + values.size());
         }
-        Clothes base = new Clothes(values.get(1), values.get(2), Size.fromString(values.get(3)),
+        Clothes base = new Sweater(values.get(1), values.get(2), Size.fromString(values.get(3)),
                 values.get(4), Material.fromString(values.get(5)),
                 parseInt(values.get(6), "year"), parseDouble(values.get(7), "price"));
         switch (type) {
