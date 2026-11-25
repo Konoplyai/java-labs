@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -13,6 +14,8 @@ import java.util.List;
  * Збереження одягу в текстовий файл (за замовчуванням input.txt).
  * Кожен об'єкт записується в окремий рядок, значення розділяються символом ';'.
  * Перше значення - назва класу, далі поля в порядку {@link ClothesRecord#keysFor(String)}.
+ * Порожні рядки і рядки, що починаються з '#', пропускаються. Некоректні рядки
+ * та повтори не зупиняють читання, а потрапляють у список помилок.
  */
 public class TextFileStorage implements ClothesStorage {
 
@@ -20,6 +23,10 @@ public class TextFileStorage implements ClothesStorage {
     public static final String DEFAULT_FILE = "input.txt";
     /** Роздільник значень у рядку. */
     public static final String SEPARATOR = ";";
+    /** Початок рядка-коментаря, такі рядки пропускаються під час читання. */
+    public static final String COMMENT = "#";
+    /** Розширення резервної копії попереднього вмісту файлу. */
+    public static final String BACKUP_SUFFIX = ".bak";
 
     private final Path file;
 
@@ -63,21 +70,40 @@ public class TextFileStorage implements ClothesStorage {
         List<String> lines = Files.readAllLines(file, StandardCharsets.UTF_8);
         for (int i = 0; i < lines.size(); i++) {
             String line = lines.get(i).trim();
-            Clothes clothes = parseLine(line);
-            items.add(clothes);
+            if (i == 0 && line.startsWith("\uFEFF")) {
+                line = line.substring(1).trim();
+            }
+            if (line.isEmpty() || line.startsWith(COMMENT)) {
+                continue;
+            }
+            try {
+                Clothes clothes = parseLine(line);
+                if (items.contains(clothes)) {
+                    errors.add("рядок " + (i + 1) + ": така річ уже є, рядок пропущено");
+                } else {
+                    items.add(clothes);
+                }
+            } catch (InvalidClothesException e) {
+                errors.add("рядок " + (i + 1) + ": " + e.getMessage() + ", рядок пропущено");
+            }
         }
         return items;
     }
 
     /**
-     * Записує весь список одягу у файл.
+     * Записує весь список одягу у файл. Попередній вміст файлу перед цим
+     * зберігається в копію з розширенням .bak, щоб не втратити пропущені рядки.
      *
      * @param items список одягу
      * @throws IOException якщо файл не вдалося записати
      */
     @Override
     public void save(List<Clothes> items) throws IOException {
+        if (Files.exists(file)) {
+            Files.copy(file, Paths.get(file + BACKUP_SUFFIX), StandardCopyOption.REPLACE_EXISTING);
+        }
         List<String> lines = new ArrayList<>();
+        lines.add(COMMENT + " тип;назва;бренд;розмір;колір;матеріал;рік;ціна;додаткові поля типу");
         for (Clothes clothes : items) {
             lines.add(formatLine(clothes));
         }

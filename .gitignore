@@ -8,3 +8,6 @@ target/
 .idea/
 .vscode/
 *.iml
+
+# Backup copies of data files
+*.bak
