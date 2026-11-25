@@ -3,15 +3,13 @@ package ua.edu.sumdu.j2se.clothes;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Тести конструктора копіювання, enum і класу Wardrobe.
+ * Тести конструктора копіювання та перерахувань.
  */
-class EnumAndWardrobeTest {
+class CopyAndEnumTest {
 
     /**
      * Створює коректний об'єкт для тестів.
@@ -44,23 +42,5 @@ class EnumAndWardrobeTest {
         assertEquals(Material.COTTON, Material.fromString("cotton"));
         assertThrows(InvalidClothesException.class, () -> Size.fromString("XXXL"));
         assertThrows(InvalidClothesException.class, () -> Material.fromString("картон"));
-    }
-
-    @Test
-    void wardrobeShouldNotAddDuplicatesOrNull() {
-        Wardrobe wardrobe = new Wardrobe("Іван");
-        assertTrue(wardrobe.add(validClothes()));
-        assertFalse(wardrobe.add(validClothes()));
-        assertThrows(IllegalArgumentException.class, () -> wardrobe.add(null));
-        assertEquals(1, wardrobe.size());
-        assertEquals(1299, wardrobe.getTotalPrice());
-    }
-
-    @Test
-    void wardrobeShouldValidateOwnerAndIndex() {
-        assertThrows(IllegalArgumentException.class, () -> new Wardrobe("  "));
-        Wardrobe wardrobe = new Wardrobe("Іван");
-        assertThrows(IllegalArgumentException.class, () -> wardrobe.get(0));
-        assertThrows(UnsupportedOperationException.class, () -> wardrobe.getItems().add(validClothes()));
     }
 }

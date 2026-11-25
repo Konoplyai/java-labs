@@ -2,10 +2,12 @@ package ua.edu.sumdu.j2se.clothes;
 
 import java.io.Console;
 import java.time.Year;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 /**
- * Драйвер з консольним меню для роботи з гардеробом одягу.
+ * Драйвер з консольним меню для роботи зі списком одягу.
  */
 public class ClothesDriver {
 
@@ -23,10 +25,9 @@ public class ClothesDriver {
     public static void main(String[] args) {
         printHeader();
         Scanner scanner = createScanner();
+        List<Clothes> items = new ArrayList<>();
         try {
-            String owner = readText(scanner, "Ім'я власника гардероба: ");
-            Wardrobe wardrobe = new Wardrobe(owner);
-            runMenu(scanner, wardrobe);
+            runMenu(scanner, items);
         } catch (IllegalStateException e) {
             System.out.println();
             System.out.println("Помилка: " + e.getMessage() + ".");
@@ -46,26 +47,22 @@ public class ClothesDriver {
      * Показує меню та виконує вибрані дії, доки користувач не вибере вихід.
      *
      * @param scanner сканер
-     * @param wardrobe гардероб
+     * @param items список одягу
      */
-    public static void runMenu(Scanner scanner, Wardrobe wardrobe) {
+    public static void runMenu(Scanner scanner, List<Clothes> items) {
         while (true) {
             System.out.println();
             System.out.println("Меню:");
             System.out.println("1. Створити новий одяг");
             System.out.println("2. Показати весь одяг");
-            System.out.println("3. Скопіювати одяг");
-            System.out.println("4. Вихід");
-            int choice = readInt(scanner, "Ваш вибір: ", 1, 4);
+            System.out.println("3. Вихід");
+            int choice = readInt(scanner, "Ваш вибір: ", 1, 3);
             switch (choice) {
                 case 1:
-                    addClothes(scanner, wardrobe);
+                    addClothes(scanner, items);
                     break;
                 case 2:
-                    printAll(wardrobe);
-                    break;
-                case 3:
-                    copyClothes(scanner, wardrobe);
+                    printAll(items);
                     break;
                 default:
                     System.out.println("Роботу завершено.");
@@ -88,55 +85,32 @@ public class ClothesDriver {
     }
 
     /**
-     * Зчитує дані нового одягу та додає його до гардероба.
+     * Зчитує дані нового одягу та додає його до списку.
      * Якщо дані некоректні або така річ уже є, річ не додається.
      *
      * @param scanner сканер
-     * @param wardrobe гардероб
+     * @param items список одягу
      */
-    public static void addClothes(Scanner scanner, Wardrobe wardrobe) {
+    public static void addClothes(Scanner scanner, List<Clothes> items) {
         try {
-            Clothes clothes = readClothes(scanner);
-            addToWardrobe(wardrobe, clothes);
+            addToList(items, readClothes(scanner));
         } catch (InvalidClothesException e) {
             System.out.println("Помилка: " + e.getMessage() + ". Річ не додано.");
         }
     }
 
     /**
-     * Створює копію вибраної речі конструктором копіювання, змінює в копії колір
-     * і додає її до гардероба.
+     * Додає річ до списку, якщо такої ще немає, і повідомляє результат.
      *
-     * @param scanner сканер
-     * @param wardrobe гардероб
-     */
-    public static void copyClothes(Scanner scanner, Wardrobe wardrobe) {
-        if (wardrobe.isEmpty()) {
-            System.out.println("Гардероб порожній, нема чого копіювати.");
-            return;
-        }
-        printAll(wardrobe);
-        int number = readInt(scanner, "Номер речі для копіювання: ", 1, wardrobe.size());
-        Clothes copy = new Clothes(wardrobe.get(number - 1));
-        try {
-            copy.setColor(readText(scanner, "  колір копії: "));
-            addToWardrobe(wardrobe, copy);
-        } catch (InvalidClothesException e) {
-            System.out.println("Помилка: " + e.getMessage() + ". Копію не додано.");
-        }
-    }
-
-    /**
-     * Додає річ до гардероба і повідомляє результат.
-     *
-     * @param wardrobe гардероб
+     * @param items список одягу
      * @param clothes річ
      */
-    private static void addToWardrobe(Wardrobe wardrobe, Clothes clothes) {
-        if (wardrobe.add(clothes)) {
-            System.out.println("Додано: " + clothes);
+    private static void addToList(List<Clothes> items, Clothes clothes) {
+        if (items.contains(clothes)) {
+            System.out.println("Така річ уже є в списку, не додано.");
         } else {
-            System.out.println("Така річ уже є в гардеробі, не додано.");
+            items.add(clothes);
+            System.out.println("Додано: " + clothes);
         }
     }
 
@@ -159,18 +133,17 @@ public class ClothesDriver {
     }
 
     /**
-     * Виводить інформацію про гардероб і всі речі через toString().
+     * Виводить усі речі через toString().
      *
-     * @param wardrobe гардероб
+     * @param items список одягу
      */
-    public static void printAll(Wardrobe wardrobe) {
-        System.out.println(wardrobe);
-        if (wardrobe.isEmpty()) {
-            System.out.println("Гардероб порожній.");
+    public static void printAll(List<Clothes> items) {
+        if (items.isEmpty()) {
+            System.out.println("Список порожній.");
             return;
         }
-        for (int i = 0; i < wardrobe.size(); i++) {
-            System.out.println((i + 1) + ". " + wardrobe.get(i));
+        for (int i = 0; i < items.size(); i++) {
+            System.out.println((i + 1) + ". " + items.get(i));
         }
     }
 
