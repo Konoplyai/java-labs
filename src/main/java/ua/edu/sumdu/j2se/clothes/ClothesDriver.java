@@ -311,6 +311,78 @@ public class ClothesDriver {
     }
 
     /**
+     * Шукає речі, назва яких містить заданий текст (без урахування регістру).
+     * Колекція не змінюється, результат повертається в новому списку.
+     *
+     * @param items список одягу
+     * @param text частина назви
+     * @return знайдені речі (порожній список, якщо нічого не знайдено)
+     */
+    public static List<Clothes> findByName(List<Clothes> items, String text) {
+        List<Clothes> result = new ArrayList<>();
+        String query = text.trim().toLowerCase();
+        for (Clothes clothes : items) {
+            if (clothes.getName().toLowerCase().contains(query)) {
+                result.add(clothes);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Шукає речі заданого класу, включно з його нащадками
+     * (наприклад, пошук штанів знаходить і джинси).
+     *
+     * @param items список одягу
+     * @param type клас, об'єкти якого потрібно знайти
+     * @return знайдені речі (порожній список, якщо нічого не знайдено)
+     */
+    public static List<Clothes> findByType(List<Clothes> items, Class<? extends Clothes> type) {
+        List<Clothes> result = new ArrayList<>();
+        for (Clothes clothes : items) {
+            if (type.isInstance(clothes)) {
+                result.add(clothes);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Шукає речі з ціною в заданих межах (межі включаються).
+     *
+     * @param items список одягу
+     * @param min найменша ціна, грн
+     * @param max найбільша ціна, грн
+     * @return знайдені речі (порожній список, якщо нічого не знайдено)
+     */
+    public static List<Clothes> findByPriceRange(List<Clothes> items, double min, double max) {
+        List<Clothes> result = new ArrayList<>();
+        for (Clothes clothes : items) {
+            if (clothes.getPrice() >= min && clothes.getPrice() <= max) {
+                result.add(clothes);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Шукає речі заданого розміру.
+     *
+     * @param items список одягу
+     * @param size розмір
+     * @return знайдені речі (порожній список, якщо нічого не знайдено)
+     */
+    public static List<Clothes> findBySize(List<Clothes> items, Size size) {
+        List<Clothes> result = new ArrayList<>();
+        for (Clothes clothes : items) {
+            if (clothes.getSize() == size) {
+                result.add(clothes);
+            }
+        }
+        return result;
+    }
+
+    /**
      * Зчитує ціле число в заданих межах, доки не буде введено правильне значення.
      *
      * @param scanner сканер
