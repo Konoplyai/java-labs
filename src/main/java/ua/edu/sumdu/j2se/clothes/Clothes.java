@@ -7,6 +7,9 @@ import java.util.Objects;
  */
 public class Clothes {
 
+    /** Допустимі розміри. */
+    public static final String[] SIZES = {"XS", "S", "M", "L", "XL", "XXL"};
+
     private String name;
     private String brand;
     private String size;
@@ -21,6 +24,7 @@ public class Clothes {
      * @param size розмір (XS, S, M, L, XL, XXL)
      * @param color колір
      * @param price ціна, грн
+     * @throws IllegalArgumentException якщо якесь значення некоректне
      */
     public Clothes(String name, String brand, String size, String color, double price) {
         setName(name);
@@ -31,6 +35,8 @@ public class Clothes {
     }
 
     /**
+     * Повертає назву.
+     *
      * @return назва
      */
     public String getName() {
@@ -38,13 +44,18 @@ public class Clothes {
     }
 
     /**
+     * Задає назву.
+     *
      * @param name назва, не порожня
+     * @throws IllegalArgumentException якщо назва порожня
      */
     public void setName(String name) {
-        this.name = name;
+        this.name = checkText(name, "назва");
     }
 
     /**
+     * Повертає бренд.
+     *
      * @return бренд
      */
     public String getBrand() {
@@ -52,13 +63,18 @@ public class Clothes {
     }
 
     /**
-     * @param brand бренд
+     * Задає бренд.
+     *
+     * @param brand бренд, не порожній
+     * @throws IllegalArgumentException якщо бренд порожній
      */
     public void setBrand(String brand) {
-        this.brand = brand;
+        this.brand = checkText(brand, "бренд");
     }
 
     /**
+     * Повертає розмір.
+     *
      * @return розмір
      */
     public String getSize() {
@@ -66,13 +82,21 @@ public class Clothes {
     }
 
     /**
-     * @param size розмір
+     * Задає розмір.
+     *
+     * @param size розмір, один з {@link #SIZES} (регістр не важливий)
+     * @throws IllegalArgumentException якщо такого розміру немає
      */
     public void setSize(String size) {
-        this.size = size;
+        if (!isValidSize(size)) {
+            throw new IllegalArgumentException("розмір має бути одним з: " + String.join(", ", SIZES));
+        }
+        this.size = size.trim().toUpperCase();
     }
 
     /**
+     * Повертає колір.
+     *
      * @return колір
      */
     public String getColor() {
@@ -80,13 +104,18 @@ public class Clothes {
     }
 
     /**
-     * @param color колір
+     * Задає колір.
+     *
+     * @param color колір, не порожній
+     * @throws IllegalArgumentException якщо колір порожній
      */
     public void setColor(String color) {
-        this.color = color;
+        this.color = checkText(color, "колір");
     }
 
     /**
+     * Повертає ціну.
+     *
      * @return ціна, грн
      */
     public double getPrice() {
@@ -94,10 +123,48 @@ public class Clothes {
     }
 
     /**
-     * @param price ціна, грн
+     * Задає ціну.
+     *
+     * @param price ціна, грн, більше 0
+     * @throws IllegalArgumentException якщо ціна не додатна
      */
     public void setPrice(double price) {
+        if (!(price > 0) || Double.isInfinite(price)) {
+            throw new IllegalArgumentException("ціна має бути більше 0");
+        }
         this.price = price;
+    }
+
+    /**
+     * Перевіряє, чи є такий розмір у списку допустимих.
+     *
+     * @param size розмір
+     * @return true, якщо розмір допустимий
+     */
+    public static boolean isValidSize(String size) {
+        if (size == null) {
+            return false;
+        }
+        for (String s : SIZES) {
+            if (s.equalsIgnoreCase(size.trim())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Перевіряє, що текст не порожній, і прибирає пробіли по краях.
+     *
+     * @param value текст
+     * @param field назва поля для повідомлення про помилку
+     * @return текст без пробілів по краях
+     */
+    private static String checkText(String value, String field) {
+        if (value == null || value.trim().isEmpty()) {
+            throw new IllegalArgumentException("поле \"" + field + "\" не може бути порожнім");
+        }
+        return value.trim();
     }
 
     /**
