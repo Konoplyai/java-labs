@@ -2,6 +2,7 @@ package ua.edu.sumdu.j2se.clothes;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 
 import java.util.List;
 
@@ -66,17 +67,42 @@ class StoreTest {
 
     @Test
     void wrongQuantityShouldThrow() {
-        assertThrows(InvalidClothesException.class, () -> store.addNewClothes(sweater, 0));
-        assertThrows(InvalidClothesException.class, () -> store.addNewClothes(sweater, -3));
-        assertThrows(InvalidClothesException.class, () -> store.addNewClothes(sweater, Store.MAX_QUANTITY + 1));
-        assertThrows(InvalidClothesException.class, () -> store.addNewClothes(null, 1));
+        assertThrows(InvalidClothesException.class, new Executable() {
+            @Override
+            public void execute() throws Throwable {
+                store.addNewClothes(sweater, 0);
+            }
+        });
+        assertThrows(InvalidClothesException.class, new Executable() {
+            @Override
+            public void execute() throws Throwable {
+                store.addNewClothes(sweater, -3);
+            }
+        });
+        assertThrows(InvalidClothesException.class, new Executable() {
+            @Override
+            public void execute() throws Throwable {
+                store.addNewClothes(sweater, Store.MAX_QUANTITY + 1);
+            }
+        });
+        assertThrows(InvalidClothesException.class, new Executable() {
+            @Override
+            public void execute() throws Throwable {
+                store.addNewClothes(null, 1);
+            }
+        });
         assertTrue(store.isEmpty());
     }
 
     @Test
     void totalQuantityShouldNotExceedMax() {
         store.addNewClothes(sweater, Store.MAX_QUANTITY - 1);
-        assertThrows(InvalidClothesException.class, () -> store.addNewClothes(sweater, 2));
+        assertThrows(InvalidClothesException.class, new Executable() {
+            @Override
+            public void execute() throws Throwable {
+                store.addNewClothes(sweater, 2);
+            }
+        });
         assertEquals(Store.MAX_QUANTITY - 1, store.getQuantity(sweater));
         assertFalse(store.addNewClothes(sweater, 1));
         assertEquals(Store.MAX_QUANTITY, store.getQuantity(sweater));
@@ -100,15 +126,40 @@ class StoreTest {
     void clothesListShouldBeReadOnly() {
         store.addNewClothes(sweater, 1);
         List<Clothes> items = store.getClothes();
-        assertThrows(UnsupportedOperationException.class, () -> items.add(trousers));
-        assertThrows(UnsupportedOperationException.class, () -> items.remove(0));
+        assertThrows(UnsupportedOperationException.class, new Executable() {
+            @Override
+            public void execute() throws Throwable {
+                items.add(trousers);
+            }
+        });
+        assertThrows(UnsupportedOperationException.class, new Executable() {
+            @Override
+            public void execute() throws Throwable {
+                items.remove(0);
+            }
+        });
         assertEquals(1, store.size());
     }
 
     @Test
     void wrongStoreDataShouldThrow() {
-        assertThrows(InvalidClothesException.class, () -> new Store("", "м. Суми"));
-        assertThrows(InvalidClothesException.class, () -> new Store("Магазин", "   "));
-        assertThrows(InvalidClothesException.class, () -> new Store(null, "м. Суми"));
+        assertThrows(InvalidClothesException.class, new Executable() {
+            @Override
+            public void execute() throws Throwable {
+                new Store("", "м. Суми");
+            }
+        });
+        assertThrows(InvalidClothesException.class, new Executable() {
+            @Override
+            public void execute() throws Throwable {
+                new Store("Магазин", " ");
+            }
+        });
+        assertThrows(InvalidClothesException.class, new Executable() {
+            @Override
+            public void execute() throws Throwable {
+                new Store(null, "м. Суми");
+            }
+        });
     }
 }

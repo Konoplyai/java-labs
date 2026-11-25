@@ -1,6 +1,7 @@
 package ua.edu.sumdu.j2se.clothes;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
@@ -32,7 +33,12 @@ class CopyAndEnumTest {
 
     @Test
     void copyConstructorShouldThrowExceptionForNull() {
-        assertThrows(InvalidClothesException.class, () -> new Sweater((Clothes) null));
+        assertThrows(InvalidClothesException.class, new Executable() {
+            @Override
+            public void execute() throws Throwable {
+                new Sweater((Clothes) null);
+            }
+        });
     }
 
     @Test
@@ -40,7 +46,17 @@ class CopyAndEnumTest {
         assertEquals(Size.XL, Size.fromString(" xl "));
         assertEquals(Material.LINEN, Material.fromString("Льон"));
         assertEquals(Material.COTTON, Material.fromString("cotton"));
-        assertThrows(InvalidClothesException.class, () -> Size.fromString("XXXL"));
-        assertThrows(InvalidClothesException.class, () -> Material.fromString("картон"));
+        assertThrows(InvalidClothesException.class, new Executable() {
+            @Override
+            public void execute() throws Throwable {
+                Size.fromString("XXXL");
+            }
+        });
+        assertThrows(InvalidClothesException.class, new Executable() {
+            @Override
+            public void execute() throws Throwable {
+                Material.fromString("картон");
+            }
+        });
     }
 }

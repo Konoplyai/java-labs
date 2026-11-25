@@ -4,6 +4,7 @@ import java.io.Console;
 import java.io.IOException;
 import java.time.Year;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +19,8 @@ public class ClothesDriver {
     public static final String STORE_NAME = "Магазин одягу";
     /** Адреса магазину. */
     public static final String STORE_ADDRESS = "м. Суми";
+    /** Кількість критеріїв сортування в підменю. */
+    public static final int SORT_CRITERIA = 4;
 
     /**
      * Закритий конструктор, бо клас містить лише статичні методи.
@@ -102,7 +105,7 @@ public class ClothesDriver {
      * Виводить інформаційну шапку програми.
      */
     public static void printHeader() {
-        System.out.println("Практична робота №13, варіант 1 (магазин одягу, сортування)");
+        System.out.println("Практична робота №14, варіант 1 (магазин одягу, сортування за критеріями)");
         System.out.println("Виконав: Конопля Іван, група Ін-42/1");
     }
 
@@ -133,7 +136,7 @@ public class ClothesDriver {
                     printAll(store);
                     break;
                 case 4:
-                    printSorted(store);
+                    sortMenu(scanner, store);
                     break;
                 default:
                     System.out.println("Роботу завершено.");
@@ -403,18 +406,112 @@ public class ClothesDriver {
     }
 
     /**
-     * Виводить усі товари магазину, відсортовані за назвою (через Comparable).
+     * Підменю сортування: користувач вибирає критерій і бачить відсортовані товари.
+     * Пункт 0 повертає до головного меню без сортування.
+     *
+     * @param scanner сканер
+     * @param store магазин
+     */
+    public static void sortMenu(Scanner scanner, Store store) {
+        while (true) {
+            System.out.println();
+            System.out.println("Оберіть критерій сортування:");
+            for (int i = 1; i <= SORT_CRITERIA; i++) {
+                System.out.println(i + ". " + getSortTitle(i));
+            }
+            System.out.println("0. Повернутися в головне меню");
+            int choice = readInt(scanner, "Критерій: ", 0, SORT_CRITERIA);
+            if (choice == 0) {
+                return;
+            }
+            printSorted(store, createComparator(choice, store), getSortTitle(choice));
+        }
+    }
+
+    /**
+     * Повертає назву критерію сортування для меню.
+     *
+     * @param criterion номер критерію від 1 до {@link #SORT_CRITERIA}
+     * @return назва критерію
+     */
+    public static String getSortTitle(int criterion) {
+        switch (criterion) {
+            case 1:
+                return "За назвою (за алфавітом)";
+            case 2:
+                return "За ціною (від дешевших)";
+            case 3:
+                return "За роком випуску (спочатку новіші)";
+            case 4:
+                return "За кількістю в магазині (спочатку більша)";
+            default:
+                throw new IllegalArgumentException("немає критерію сортування " + criterion);
+        }
+    }
+
+    /**
+     * Створює компаратор для заданого критерію. Кожен критерій - це окремий анонімний
+     * внутрішній клас, який реалізує Comparator. Якщо за критерієм речі однакові,
+     * вони порівнюються за назвою (compareTo), щоб порядок був однозначним.
+     *
+     * @param criterion номер критерію від 1 до {@link #SORT_CRITERIA}
+     * @param store магазин (потрібен для сортування за кількістю)
+     * @return компаратор
+     * @throws IllegalArgumentException якщо такого критерію немає
+     */
+    public static Comparator<Clothes> createComparator(int criterion, final Store store) {
+        switch (criterion) {
+            case 1:
+                return new Comparator<Clothes>() {
+                    @Override
+                    public int compare(Clothes o1, Clothes o2) {
+                        return o1.compareTo(o2);
+                    }
+                };
+            case 2:
+                return new Comparator<Clothes>() {
+                    @Override
+                    public int compare(Clothes o1, Clothes o2) {
+                        int result = Double.compare(o1.getPrice(), o2.getPrice());
+                        return result != 0 ? result : o1.compareTo(o2);
+                    }
+                };
+            case 3:
+                return new Comparator<Clothes>() {
+                    @Override
+                    public int compare(Clothes o1, Clothes o2) {
+                        int result = Integer.compare(o2.getReleaseYear(), o1.getReleaseYear());
+                        return result != 0 ? result : o1.compareTo(o2);
+                    }
+                };
+            case 4:
+                return new Comparator<Clothes>() {
+                    @Override
+                    public int compare(Clothes o1, Clothes o2) {
+                        int result = Integer.compare(store.getQuantity(o2), store.getQuantity(o1));
+                        return result != 0 ? result : o1.compareTo(o2);
+                    }
+                };
+            default:
+                throw new IllegalArgumentException("немає критерію сортування " + criterion);
+        }
+    }
+
+    /**
+     * Виводить усі товари магазину, відсортовані заданим компаратором.
      * Сортується копія списку, порядок товарів у магазині не змінюється.
      *
      * @param store магазин
+     * @param comparator критерій сортування
+     * @param title назва критерію для заголовка
      */
-    public static void printSorted(Store store) {
+    public static void printSorted(Store store, Comparator<Clothes> comparator, String title) {
         if (store.isEmpty()) {
             System.out.println("У магазині немає товарів.");
             return;
         }
-        List<Clothes> sorted = store.getSortedClothes();
-        System.out.println("Товари, відсортовані за назвою:");
+        List<Clothes> sorted = store.getSortedClothes(comparator);
+        System.out.println("Товари, відсортовані: " + title.toLowerCase());
         for (int i = 0; i < sorted.size(); i++) {
             Clothes clothes = sorted.get(i);
             System.out.println((i + 1) + ". " + clothes.getName() + " - " + clothes.getType() + ": " + clothes

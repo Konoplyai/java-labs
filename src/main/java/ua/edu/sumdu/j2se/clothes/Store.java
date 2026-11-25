@@ -2,6 +2,7 @@ package ua.edu.sumdu.j2se.clothes;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -112,6 +113,23 @@ public class Store {
     public List<Clothes> getSortedClothes() {
         List<Clothes> sorted = new ArrayList<>(clothes);
         Collections.sort(sorted);
+        return sorted;
+    }
+
+    /**
+     * Повертає новий список усіх товарів, відсортований заданим компаратором.
+     * Порядок товарів у самому магазині не змінюється.
+     *
+     * @param comparator правило порівняння товарів
+     * @return відсортований список товарів
+     * @throws IllegalArgumentException якщо компаратор не задано
+     */
+    public List<Clothes> getSortedClothes(Comparator<Clothes> comparator) {
+        if (comparator == null) {
+            throw new IllegalArgumentException("критерій сортування не задано");
+        }
+        List<Clothes> sorted = new ArrayList<>(clothes);
+        Collections.sort(sorted, comparator);
         return sorted;
     }
 

@@ -1,6 +1,7 @@
 package ua.edu.sumdu.j2se.clothes;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -95,7 +96,12 @@ class SortTest {
 
     @Test
     void compareToNullShouldThrow() {
-        assertThrows(NullPointerException.class, () -> sweater.compareTo(null));
+        assertThrows(NullPointerException.class, new Executable() {
+            @Override
+            public void execute() throws Throwable {
+                sweater.compareTo(null);
+            }
+        });
     }
 
     @Test
@@ -128,7 +134,7 @@ class SortTest {
         Store store = new Store("Магазин одягу", "м. Суми");
         store.addNewClothes(sweater, 5);
         store.addNewClothes(trousers, 3);
-        String output = runMenu(store, "4\n5\n");
+        String output = runMenu(store, "4\n1\n0\n5\n");
         assertTrue(output.contains("1. Брюки"));
         assertTrue(output.contains("2. Светр"));
         assertTrue(output.indexOf("1. Брюки") < output.indexOf("2. Светр"));
@@ -136,7 +142,7 @@ class SortTest {
 
     @Test
     void menuShouldWorkWithEmptyStoreAndWrongInput() {
-        String output = runMenu(new Store("Магазин одягу", "м. Суми"), "abc\n\n9\n4\n5\n");
+        String output = runMenu(new Store("Магазин одягу", "м. Суми"), "abc\n\n9\n4\n1\n0\n5\n");
         assertTrue(output.contains("потрібно ввести ціле число"));
         assertTrue(output.contains("значення не може бути порожнім"));
         assertTrue(output.contains("число має бути від 1 до 5"));
