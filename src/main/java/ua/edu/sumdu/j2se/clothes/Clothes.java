@@ -229,15 +229,34 @@ public class Clothes {
     }
 
     /**
+     * Повертає тип речі для виводу. Класи-нащадки перевизначають цей метод.
+     *
+     * @return назва типу
+     */
+    public String getType() {
+        return "Одяг";
+    }
+
+    /**
+     * Повертає спільні для всього одягу поля одним рядком.
+     * Використовується в toString() цього класу і класів-нащадків.
+     *
+     * @return поля базового класу
+     */
+    protected String baseInfo() {
+        return "назва='" + name + "', бренд='" + brand + "', розмір=" + size
+                + ", колір='" + color + "', матеріал=" + material.getTitle() + ", рік=" + releaseYear
+                + ", ціна=" + String.format("%.2f", price) + " грн";
+    }
+
+    /**
      * Повертає опис одягу одним рядком.
      *
      * @return рядок з усіма полями
      */
     @Override
     public String toString() {
-        return "Clothes{назва='" + name + "', бренд='" + brand + "', розмір=" + size
-                + ", колір='" + color + "', матеріал=" + material.getTitle() + ", рік=" + releaseYear
-                + ", ціна=" + String.format("%.2f", price) + " грн}";
+        return "Clothes{" + baseInfo() + "}";
     }
 
     /**
