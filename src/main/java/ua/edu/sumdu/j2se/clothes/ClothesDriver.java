@@ -106,9 +106,9 @@ public class ClothesDriver {
     public static Clothes readClothes(Scanner scanner) {
         String name = readText(scanner, "  назва: ");
         String brand = readText(scanner, "  бренд: ");
-        String size = readSize(scanner, "  розмір (" + String.join(", ", Clothes.SIZES) + "): ");
+        Size size = readSize(scanner, "  розмір (" + Size.list() + "): ");
         String color = readText(scanner, "  колір: ");
-        String material = readText(scanner, "  матеріал: ");
+        Material material = readMaterial(scanner, "  матеріал (" + Material.list() + "): ");
         int year = readInt(scanner, "  рік випуску: ", Clothes.MIN_YEAR, Year.now().getValue());
         double price = readPrice(scanner, "  ціна, грн: ");
         return new Clothes(name, brand, size, color, material, year, price);
@@ -179,15 +179,34 @@ public class ClothesDriver {
      *
      * @param scanner сканер
      * @param prompt підказка
-     * @return розмір великими літерами
+     * @return розмір
      */
-    public static String readSize(Scanner scanner, String prompt) {
+    public static Size readSize(Scanner scanner, String prompt) {
         while (true) {
             String line = readLine(scanner, prompt);
-            if (Clothes.isValidSize(line)) {
-                return line.toUpperCase();
+            try {
+                return Size.fromString(line);
+            } catch (InvalidClothesException e) {
+                System.out.println("  Помилка: такого розміру немає.");
             }
-            System.out.println("  Помилка: такого розміру немає.");
+        }
+    }
+
+    /**
+     * Зчитує матеріал зі списку допустимих.
+     *
+     * @param scanner сканер
+     * @param prompt підказка
+     * @return матеріал
+     */
+    public static Material readMaterial(Scanner scanner, String prompt) {
+        while (true) {
+            String line = readLine(scanner, prompt);
+            try {
+                return Material.fromString(line);
+            } catch (InvalidClothesException e) {
+                System.out.println("  Помилка: такого матеріалу немає.");
+            }
         }
     }
 
