@@ -21,7 +21,7 @@ class InheritanceTest {
      * @return одяг з правильними даними
      */
     private Clothes base() {
-        return new Clothes("Річ", "Zara", Size.M, "синій", Material.COTTON, 2023, 999);
+        return new Sweater("Річ", "Zara", Size.M, "синій", Material.COTTON, 2023, 999);
     }
 
     @Test
@@ -57,10 +57,10 @@ class InheritanceTest {
         items.add(new Pants(base(), 82, 100));
         items.add(new Shirts(base(), Sleeve.LONG, 41));
 
-        assertEquals("Одяг", items.get(0).getType());
+        assertEquals("Светр", items.get(0).getType());
         assertEquals("Штани", items.get(1).getType());
         assertEquals("Сорочка", items.get(2).getType());
-        assertTrue(items.get(0).toString().startsWith("Clothes{"));
+        assertTrue(items.get(0).toString().startsWith("Sweater{"));
         assertTrue(items.get(1).toString().startsWith("Pants{"));
         assertTrue(items.get(2).toString().contains("рукав=довгий"));
     }

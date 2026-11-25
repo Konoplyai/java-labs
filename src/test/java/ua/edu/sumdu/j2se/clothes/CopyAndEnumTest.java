@@ -17,13 +17,13 @@ class CopyAndEnumTest {
      * @return одяг з правильними даними
      */
     private Clothes validClothes() {
-        return new Clothes("Светр", "H&M", Size.L, "сірий", Material.WOOL, 2021, 1299);
+        return new Sweater("Светр", "H&M", Size.L, "сірий", Material.WOOL, 2021, 1299);
     }
 
     @Test
     void copyConstructorShouldCreateEqualButDifferentObject() {
         Clothes original = validClothes();
-        Clothes copy = new Clothes(original);
+        Clothes copy = new Sweater(original);
         assertEquals(original, copy);
         assertNotSame(original, copy);
         copy.setColor("білий");
@@ -32,7 +32,7 @@ class CopyAndEnumTest {
 
     @Test
     void copyConstructorShouldThrowExceptionForNull() {
-        assertThrows(InvalidClothesException.class, () -> new Clothes((Clothes) null));
+        assertThrows(InvalidClothesException.class, () -> new Sweater((Clothes) null));
     }
 
     @Test

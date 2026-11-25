@@ -71,7 +71,7 @@ class HierarchyExtensionTest {
     @Test
     void careInstructionsShouldBeOverridden() {
         List<Clothes> items = new ArrayList<>();
-        items.add(new Clothes("Светр", "H&M", Size.L, "сірий", Material.WOOL, 2021, 1299));
+        items.add(new Sweater("Светр", "H&M", Size.L, "сірий", Material.WOOL, 2021, 1299));
         items.add(new Jeans(pants(), Fit.SLIM, 13));
         items.add(new FormalShirt(longShirt(), true, true));
 

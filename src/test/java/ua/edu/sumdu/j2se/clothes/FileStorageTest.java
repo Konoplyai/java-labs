@@ -29,7 +29,7 @@ class FileStorageTest {
      * @return магазин
      */
     private Store sample() {
-        Clothes base = new Clothes("Светр", "H&M", Size.L, "сірий", Material.WOOL, 2021, 1299.5);
+        Clothes base = new Sweater("Светр", "H&M", Size.L, "сірий", Material.WOOL, 2021, 1299.5);
         Pants pants = new Pants(base, 80, 104);
         Shirts shirts = new Shirts(base, Sleeve.LONG, 40);
         Store store = new Store("Магазин одягу", "м. Суми");
@@ -82,9 +82,9 @@ class FileStorageTest {
     void repeatedLineShouldIncreaseQuantity() throws IOException {
         Path file = dir.resolve("input.txt");
         Files.write(file, Arrays.asList(
-                "Clothes;Футболка;Nike;M;білий;COTTON;2022;450;3",
+                "Sweater;Футболка;Nike;M;білий;COTTON;2022;450;3",
                 "Pants;Шорти;Puma;M;сірий;COTTON;2023;700;80;50;1",
-                "Clothes;Футболка;Nike;M;білий;COTTON;2022;450;4"), StandardCharsets.UTF_8);
+                "Sweater;Футболка;Nike;M;білий;COTTON;2022;450;4"), StandardCharsets.UTF_8);
         Store store = new Store("Магазин одягу", "м. Суми");
         List<String> errors = new ArrayList<>();
         assertEquals(3, new TextFileStorage(file.toString()).load(store, errors));
@@ -99,13 +99,13 @@ class FileStorageTest {
         Files.write(file, Arrays.asList(
                 "# коментар",
                 "",
-                "Clothes;Футболка;Nike;M;білий;COTTON;2022;450;2",
+                "Sweater;Футболка;Nike;M;білий;COTTON;2022;450;2",
                 "Hat;Кепка;Nike;S;червоний;COTTON;2022;450;1",
-                "Clothes;Футболка;Nike;XXXL;білий;COTTON;2022;450;1",
+                "Sweater;Футболка;Nike;XXXL;білий;COTTON;2022;450;1",
                 "Pants;Шорти;Puma;M;сірий;COTTON;2023;abc;80;50;1",
-                "Clothes;Футболка;Nike;M;білий;COTTON;2022;450",
-                "Clothes;Футболка;Nike;M;білий;COTTON;2022;450;0",
-                "Clothes;Футболка;Nike;M;білий;COTTON;2022;450;багато",
+                "Sweater;Футболка;Nike;M;білий;COTTON;2022;450",
+                "Sweater;Футболка;Nike;M;білий;COTTON;2022;450;0",
+                "Sweater;Футболка;Nike;M;білий;COTTON;2022;450;багато",
                 "Футболка"), StandardCharsets.UTF_8);
         Store store = new Store("Магазин одягу", "м. Суми");
         List<String> errors = new ArrayList<>();
@@ -156,6 +156,6 @@ class FileStorageTest {
     @Test
     void textShouldNotContainSeparator() {
         assertThrows(InvalidClothesException.class,
-                () -> new Clothes("a;b", "H&M", Size.L, "сірий", Material.WOOL, 2021, 100));
+                () -> new Sweater("a;b", "H&M", Size.L, "сірий", Material.WOOL, 2021, 100));
     }
 }
