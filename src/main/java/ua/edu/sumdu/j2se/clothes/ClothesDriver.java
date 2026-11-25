@@ -95,7 +95,7 @@ public class ClothesDriver {
      * Виводить інформаційну шапку програми.
      */
     public static void printHeader() {
-        System.out.println("Практична робота №9, варіант 1 (одяг, збереження у файл)");
+        System.out.println("Практична робота №10, варіант 1 (одяг, пошук у колекції)");
         System.out.println("Виконав: Конопля Іван, група Ін-42/1");
     }
 
@@ -109,21 +109,126 @@ public class ClothesDriver {
         while (true) {
             System.out.println();
             System.out.println("Меню:");
-            System.out.println("1. Створити новий об'єкт");
-            System.out.println("2. Вивести інформацію про всі об'єкти");
-            System.out.println("3. Завершити роботу");
-            int choice = readInt(scanner, "Ваш вибір: ", 1, 3);
+            System.out.println("1. Пошук об'єкта");
+            System.out.println("2. Створити новий об'єкт");
+            System.out.println("3. Вивести інформацію про всі об'єкти");
+            System.out.println("4. Завершити роботу");
+            int choice = readInt(scanner, "Ваш вибір: ", 1, 4);
             switch (choice) {
                 case 1:
-                    createObject(scanner, items);
+                    searchMenu(scanner, items);
                     break;
                 case 2:
+                    createObject(scanner, items);
+                    break;
+                case 3:
                     printAll(items);
                     break;
                 default:
                     System.out.println("Роботу завершено.");
                     return;
             }
+        }
+    }
+
+    /**
+     * Підменю пошуку: користувач вибирає критерій, вводить значення і бачить результат.
+     * Пункт 0 повертає до головного меню. Колекція під час пошуку не змінюється.
+     *
+     * @param scanner сканер
+     * @param items список одягу
+     */
+    public static void searchMenu(Scanner scanner, List<Clothes> items) {
+        while (true) {
+            System.out.println();
+            System.out.println("Пошук за:");
+            System.out.println("1. Назвою (частина назви)");
+            System.out.println("2. Типом");
+            System.out.println("3. Діапазоном ціни");
+            System.out.println("4. Розміром");
+            System.out.println("0. Повернутися до головного меню");
+            int choice = readInt(scanner, "Критерій: ", 0, 4);
+            List<Clothes> found;
+            switch (choice) {
+                case 1:
+                    found = findByName(items, readText(scanner, "  текст для пошуку в назві: "));
+                    break;
+                case 2:
+                    found = findByType(items, readType(scanner));
+                    break;
+                case 3:
+                    double min = readPrice(scanner, "  ціна від, грн: ");
+                    double max = readMaxPrice(scanner, min);
+                    found = findByPriceRange(items, min, max);
+                    break;
+                case 4:
+                    found = findBySize(items, readSize(scanner, "  розмір (" + Size.list() + "): "));
+                    break;
+                default:
+                    return;
+            }
+            printSearchResult(found);
+        }
+    }
+
+    /**
+     * Пропонує вибрати клас для пошуку за типом.
+     *
+     * @param scanner сканер
+     * @return вибраний клас
+     */
+    public static Class<? extends Clothes> readType(Scanner scanner) {
+        System.out.println("  1. Одяг (усі речі)");
+        System.out.println("  2. Штани (разом з джинсами)");
+        System.out.println("  3. Джинси");
+        System.out.println("  4. Сорочки (разом з класичними)");
+        System.out.println("  5. Класичні сорочки");
+        int type = readInt(scanner, "  тип: ", 1, 5);
+        switch (type) {
+            case 2:
+                return Pants.class;
+            case 3:
+                return Jeans.class;
+            case 4:
+                return Shirts.class;
+            case 5:
+                return FormalShirt.class;
+            default:
+                return Clothes.class;
+        }
+    }
+
+    /**
+     * Зчитує верхню межу ціни, яка не може бути меншою за нижню.
+     *
+     * @param scanner сканер
+     * @param min нижня межа ціни
+     * @return верхня межа ціни
+     */
+    public static double readMaxPrice(Scanner scanner, double min) {
+        while (true) {
+            double max = readPrice(scanner, "  ціна до, грн: ");
+            if (max >= min) {
+                return max;
+            }
+            System.out.println("  Помилка: верхня межа не може бути меншою за " + String.format("%.2f", min) + ".");
+        }
+    }
+
+    /**
+     * Виводить результат пошуку або повідомлення, що нічого не знайдено.
+     *
+     * @param found знайдені речі
+     */
+    public static void printSearchResult(List<Clothes> found) {
+        if (found.isEmpty()) {
+            System.out.println("Жоден об'єкт не відповідає умовам пошуку.");
+            return;
+        }
+        System.out.println("Знайдено: " + found.size());
+        for (int i = 0; i < found.size(); i++) {
+            Clothes clothes = found.get(i);
+            System.out.println((i + 1) + ". " + clothes.getType() + ": " + clothes);
         }
     }
 
