@@ -82,6 +82,82 @@ public class Store {
     }
 
     /**
+     * Видаляє з магазину задану кількість товару. Якщо видаляється вся кількість,
+     * товар повністю прибирається зі списку.
+     *
+     * @param cl товар
+     * @param quantity скільки одиниць видалити, від 1 до наявної кількості
+     * @return кількість, що залишилась (0, якщо товар прибрано зі списку)
+     * @throws InvalidClothesException якщо товару немає в магазині або кількість некоректна
+     */
+    public int removeClothes(Clothes cl, int quantity) {
+        int index = indexOfExisting(cl);
+        int current = quantities.get(index);
+        if (quantity < 1 || quantity > current) {
+            throw new InvalidClothesException("видалити можна від 1 до " + current + " шт.");
+        }
+        if (quantity == current) {
+            clothes.remove(index);
+            quantities.remove(index);
+            return 0;
+        }
+        quantities.set(index, current - quantity);
+        return current - quantity;
+    }
+
+    /**
+     * Змінює кількість наявного товару.
+     *
+     * @param cl товар
+     * @param quantity нова кількість, від 1 до {@link #MAX_QUANTITY}
+     * @throws InvalidClothesException якщо товару немає в магазині або кількість некоректна
+     */
+    public void setQuantity(Clothes cl, int quantity) {
+        int index = indexOfExisting(cl);
+        if (quantity < 1 || quantity > MAX_QUANTITY) {
+            throw new InvalidClothesException("кількість має бути від 1 до " + MAX_QUANTITY);
+        }
+        quantities.set(index, quantity);
+    }
+
+    /**
+     * Змінює ціну наявного товару. Якщо після зміни товар стане таким самим,
+     * як інший товар магазину, зміна скасовується, щоб у списку не було повторів.
+     *
+     * @param cl товар
+     * @param price нова ціна, грн
+     * @throws InvalidClothesException якщо товару немає, ціна некоректна
+     *                                 або такий товар з новою ціною вже є
+     */
+    public void changePrice(Clothes cl, double price) {
+        Clothes item = clothes.get(indexOfExisting(cl));
+        double oldPrice = item.getPrice();
+        item.setPrice(price);
+        for (Clothes other : clothes) {
+            if (other != item && other.equals(item)) {
+                item.setPrice(oldPrice);
+                throw new InvalidClothesException("такий товар з ціною " + String.format("%.2f", price)
+                        + " грн уже є в магазині");
+            }
+        }
+    }
+
+    /**
+     * Повертає індекс товару, який точно є в магазині.
+     *
+     * @param cl товар
+     * @return індекс у списку
+     * @throws InvalidClothesException якщо такого товару немає
+     */
+    private int indexOfExisting(Clothes cl) {
+        int index = clothes.indexOf(cl);
+        if (index == -1) {
+            throw new InvalidClothesException("такого товару немає в магазині");
+        }
+        return index;
+    }
+
+    /**
      * Повертає кількість заданого товару в магазині.
      *
      * @param cl товар
