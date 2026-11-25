@@ -1,0 +1,247 @@
+package ua.edu.sumdu.j2se.clothes;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+/**
+ * Магазин одягу. Зберігає товари в ArrayList, а кількість кожного товару
+ * в іншому ArrayList з тим самим індексом (кількість зберігається як Integer).
+ * Магазин "володіє" своєю колекцією: змінити її можна лише через методи класу.
+ */
+public class Store {
+
+    /** Найбільша кількість одного товару в магазині. */
+    public static final int MAX_QUANTITY = 10000;
+
+    private final String name;
+    private final String address;
+    private final ArrayList<Clothes> clothes = new ArrayList<>();
+    private final ArrayList<Integer> quantities = new ArrayList<>();
+
+    /**
+     * Створює порожній магазин.
+     *
+     * @param name назва магазину
+     * @param address адреса магазину
+     * @throws InvalidClothesException якщо назва або адреса порожні чи задовгі
+     */
+    public Store(String name, String address) {
+        this.name = checkText(name, "назва магазину");
+        this.address = checkText(address, "адреса магазину");
+    }
+
+    /**
+     * Повертає назву магазину.
+     *
+     * @return назва
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * Повертає адресу магазину.
+     *
+     * @return адреса
+     */
+    public String getAddress() {
+        return address;
+    }
+
+    /**
+     * Додає товар у магазин. Якщо такий самий товар (equals) уже є,
+     * новий об'єкт не додається, а збільшується кількість наявного.
+     *
+     * @param cl товар
+     * @param quantity кількість, від 1 до {@link #MAX_QUANTITY}
+     * @return true, якщо додано новий товар; false, якщо збільшено кількість наявного
+     * @throws InvalidClothesException якщо товар null, кількість некоректна
+     *                                 або загальна кількість перевищить {@link #MAX_QUANTITY}
+     */
+    public boolean addNewClothes(Clothes cl, int quantity) {
+        if (cl == null) {
+            throw new InvalidClothesException("товар не задано");
+        }
+        if (quantity < 1 || quantity > MAX_QUANTITY) {
+            throw new InvalidClothesException("кількість має бути від 1 до " + MAX_QUANTITY);
+        }
+        int index = clothes.indexOf(cl);
+        if (index == -1) {
+            clothes.add(cl);
+            quantities.add(quantity);
+            return true;
+        }
+        int total = quantities.get(index) + quantity;
+        if (total > MAX_QUANTITY) {
+            throw new InvalidClothesException("разом буде " + total + " шт., а можна не більше " + MAX_QUANTITY);
+        }
+        quantities.set(index, total);
+        return false;
+    }
+
+    /**
+     * Повертає кількість заданого товару в магазині.
+     *
+     * @param cl товар
+     * @return кількість або 0, якщо такого товару немає
+     */
+    public int getQuantity(Clothes cl) {
+        int index = clothes.indexOf(cl);
+        if (index == -1) {
+            return 0;
+        }
+        return quantities.get(index);
+    }
+
+    /**
+     * Повертає список товарів лише для читання.
+     *
+     * @return незмінний список товарів у порядку додавання
+     */
+    public List<Clothes> getClothes() {
+        return Collections.unmodifiableList(clothes);
+    }
+
+    /**
+     * Повертає кількість різних товарів (позицій).
+     *
+     * @return кількість позицій
+     */
+    public int size() {
+        return clothes.size();
+    }
+
+    /**
+     * Перевіряє, чи магазин порожній.
+     *
+     * @return true, якщо товарів немає
+     */
+    public boolean isEmpty() {
+        return clothes.isEmpty();
+    }
+
+    /**
+     * Рахує загальну кількість одиниць усіх товарів.
+     *
+     * @return сума кількостей
+     */
+    public int getTotalQuantity() {
+        int total = 0;
+        for (Integer quantity : quantities) {
+            total += quantity;
+        }
+        return total;
+    }
+
+    /**
+     * Рахує вартість усіх товарів з урахуванням кількості.
+     *
+     * @return загальна вартість, грн
+     */
+    public double getTotalValue() {
+        double total = 0;
+        for (int i = 0; i < clothes.size(); i++) {
+            total += clothes.get(i).getPrice() * quantities.get(i);
+        }
+        return total;
+    }
+
+    /**
+     * Шукає товари, назва яких містить заданий текст (без урахування регістру).
+     * Колекція не змінюється, результат повертається в новому списку.
+     *
+     * @param text частина назви
+     * @return знайдені товари (порожній список, якщо нічого не знайдено)
+     */
+    public List<Clothes> findByName(String text) {
+        List<Clothes> result = new ArrayList<>();
+        String query = text.trim().toLowerCase();
+        for (Clothes item : clothes) {
+            if (item.getName().toLowerCase().contains(query)) {
+                result.add(item);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Шукає товари заданого класу, включно з його нащадками
+     * (наприклад, пошук штанів знаходить і джинси).
+     *
+     * @param type клас, об'єкти якого потрібно знайти
+     * @return знайдені товари (порожній список, якщо нічого не знайдено)
+     */
+    public List<Clothes> findByType(Class<? extends Clothes> type) {
+        List<Clothes> result = new ArrayList<>();
+        for (Clothes item : clothes) {
+            if (type.isInstance(item)) {
+                result.add(item);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Шукає товари з ціною в заданих межах (межі включаються).
+     *
+     * @param min найменша ціна, грн
+     * @param max найбільша ціна, грн
+     * @return знайдені товари (порожній список, якщо нічого не знайдено)
+     */
+    public List<Clothes> findByPriceRange(double min, double max) {
+        List<Clothes> result = new ArrayList<>();
+        for (Clothes item : clothes) {
+            if (item.getPrice() >= min && item.getPrice() <= max) {
+                result.add(item);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Шукає товари заданого розміру.
+     *
+     * @param size розмір
+     * @return знайдені товари (порожній список, якщо нічого не знайдено)
+     */
+    public List<Clothes> findBySize(Size size) {
+        List<Clothes> result = new ArrayList<>();
+        for (Clothes item : clothes) {
+            if (item.getSize() == size) {
+                result.add(item);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Повертає коротку інформацію про магазин.
+     *
+     * @return назва, адреса і кількість товарів
+     */
+    @Override
+    public String toString() {
+        return "Store{назва='" + name + "', адреса='" + address + "', позицій=" + clothes.size()
+                + ", одиниць=" + getTotalQuantity() + "}";
+    }
+
+    /**
+     * Перевіряє текстове поле магазину.
+     *
+     * @param value значення
+     * @param field назва поля для повідомлення
+     * @return значення без пробілів по краях
+     * @throws InvalidClothesException якщо значення порожнє або задовге
+     */
+    private static String checkText(String value, String field) {
+        if (value == null || value.trim().isEmpty()) {
+            throw new InvalidClothesException("поле \"" + field + "\" не може бути порожнім");
+        }
+        if (value.trim().length() > Clothes.MAX_TEXT_LENGTH) {
+            throw new InvalidClothesException("поле \"" + field + "\" не може бути довшим за "
+                    + Clothes.MAX_TEXT_LENGTH + " символів");
+        }
+        return value.trim();
+    }
+}
