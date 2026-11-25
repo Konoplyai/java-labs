@@ -100,7 +100,7 @@ public class JsonFileStorage implements ClothesStorage {
                 int quantity = TextFileStorage.parseQuantity(getValue(array.get(i).getAsJsonObject(), QUANTITY));
                 store.addNewClothes(clothes, quantity);
                 count++;
-            } catch (InvalidClothesException e) {
+            } catch (InvalidClothesException | StoreException e) {
                 errors.add("елемент " + (i + 1) + ": " + e.getMessage() + ", пропущено");
             }
         }

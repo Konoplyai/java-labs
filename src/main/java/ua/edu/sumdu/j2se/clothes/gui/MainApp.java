@@ -28,6 +28,7 @@ import ua.edu.sumdu.j2se.clothes.Material;
 import ua.edu.sumdu.j2se.clothes.Size;
 import ua.edu.sumdu.j2se.clothes.Sleeve;
 import ua.edu.sumdu.j2se.clothes.Store;
+import ua.edu.sumdu.j2se.clothes.StoreException;
 import ua.edu.sumdu.j2se.clothes.TextFileStorage;
 
 import java.io.IOException;
@@ -260,7 +261,7 @@ public class MainApp extends Application {
             } else {
                 showStatus("Такий товар уже є, кількість збільшено до " + store.getQuantity(clothes) + " шт.", false);
             }
-        } catch (InvalidClothesException e) {
+        } catch (InvalidClothesException | StoreException e) {
             showStatus("Помилка: " + e.getMessage(), true);
         }
     }

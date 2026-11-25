@@ -86,7 +86,7 @@ public class TextFileStorage implements ClothesStorage {
                 int quantity = parseQuantity(line.substring(last + 1));
                 store.addNewClothes(parseLine(line.substring(0, last)), quantity);
                 count++;
-            } catch (InvalidClothesException e) {
+            } catch (InvalidClothesException | StoreException e) {
                 errors.add("рядок " + (i + 1) + ": " + e.getMessage() + ", рядок пропущено");
             }
         }
