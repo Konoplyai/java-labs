@@ -1,6 +1,7 @@
 package ua.edu.sumdu.j2se.clothes;
 
 import java.io.Console;
+import java.io.IOException;
 import java.time.Year;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -20,28 +21,81 @@ public class ClothesDriver {
     }
 
     /**
-     * Точка входу в програму.
+     * Точка входу в програму. На початку зчитує одяг з файлу,
+     * під час завершення записує актуальний список назад у цей самий файл.
      *
-     * @param args аргументи командного рядка (не використовуються)
+     * @param args якщо перший аргумент "json", використовується файл input.json,
+     *             інакше input.txt
      */
     public static void main(String[] args) {
         printHeader();
+        ClothesStorage storage = createStorage(args);
+        List<Clothes> items = loadItems(storage);
         Scanner scanner = createScanner();
-        List<Clothes> items = new ArrayList<>();
         try {
             runMenu(scanner, items);
         } catch (IllegalStateException e) {
             System.out.println();
             System.out.println("Помилка: " + e.getMessage() + ".");
         }
+        saveItems(storage, items);
         scanner.close();
+    }
+
+    /**
+     * Вибирає сховище за аргументами командного рядка.
+     *
+     * @param args аргументи командного рядка
+     * @return сховище JSON, якщо перший аргумент "json", інакше текстове
+     */
+    public static ClothesStorage createStorage(String[] args) {
+        if (args.length > 0 && args[0].equalsIgnoreCase("json")) {
+            return new JsonFileStorage(JsonFileStorage.DEFAULT_FILE);
+        }
+        return new TextFileStorage(TextFileStorage.DEFAULT_FILE);
+    }
+
+    /**
+     * Зчитує одяг зі сховища і виводить повідомлення про пропущені записи.
+     *
+     * @param storage сховище
+     * @return список одягу (порожній, якщо прочитати не вдалося)
+     */
+    public static List<Clothes> loadItems(ClothesStorage storage) {
+        List<Clothes> items = new ArrayList<>();
+        List<String> errors = new ArrayList<>();
+        try {
+            items = storage.load(errors);
+        } catch (IOException e) {
+            System.out.println("Не вдалося прочитати файл " + storage.getFileName() + ": " + e.getMessage());
+        }
+        for (String error : errors) {
+            System.out.println("  " + error);
+        }
+        System.out.println("Зчитано з файлу " + storage.getFileName() + ": " + items.size() + " об'єкт(ів).");
+        return items;
+    }
+
+    /**
+     * Записує весь список одягу у сховище.
+     *
+     * @param storage сховище
+     * @param items список одягу
+     */
+    public static void saveItems(ClothesStorage storage, List<Clothes> items) {
+        try {
+            storage.save(items);
+            System.out.println("Записано у файл " + storage.getFileName() + ": " + items.size() + " об'єкт(ів).");
+        } catch (IOException e) {
+            System.out.println("Не вдалося записати файл " + storage.getFileName() + ": " + e.getMessage());
+        }
     }
 
     /**
      * Виводить інформаційну шапку програми.
      */
     public static void printHeader() {
-        System.out.println("Практична робота №8, варіант 1 (ієрархія класів одягу)");
+        System.out.println("Практична робота №9, варіант 1 (одяг, збереження у файл)");
         System.out.println("Виконав: Конопля Іван, група Ін-42/1");
     }
 

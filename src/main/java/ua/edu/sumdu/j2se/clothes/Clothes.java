@@ -215,7 +215,8 @@ public class Clothes {
      * @param value текст
      * @param field назва поля для повідомлення про помилку
      * @return текст без пробілів по краях
-     * @throws InvalidClothesException якщо текст порожній або довший за {@link #MAX_TEXT_LENGTH}
+     * @throws InvalidClothesException якщо текст порожній, довший за {@link #MAX_TEXT_LENGTH}
+     *                                 або містить символ ';' (роздільник у файлі)
      */
     private static String checkText(String value, String field) {
         if (value == null || value.trim().isEmpty()) {
@@ -224,6 +225,9 @@ public class Clothes {
         if (value.trim().length() > MAX_TEXT_LENGTH) {
             throw new InvalidClothesException("поле \"" + field + "\" не може бути довшим за "
                     + MAX_TEXT_LENGTH + " символів");
+        }
+        if (value.contains(";")) {
+            throw new InvalidClothesException("поле \"" + field + "\" не може містити символ ';'");
         }
         return value.trim();
     }
