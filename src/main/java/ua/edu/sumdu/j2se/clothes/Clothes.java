@@ -45,6 +45,25 @@ public class Clothes {
     }
 
     /**
+     * Конструктор копіювання: створює новий об'єкт з тими самими значеннями полів.
+     *
+     * @param other одяг, який копіюється
+     * @throws InvalidClothesException якщо other дорівнює null
+     */
+    public Clothes(Clothes other) {
+        if (other == null) {
+            throw new InvalidClothesException("об'єкт для копіювання не задано");
+        }
+        this.name = other.name;
+        this.brand = other.brand;
+        this.size = other.size;
+        this.color = other.color;
+        this.material = other.material;
+        this.releaseYear = other.releaseYear;
+        this.price = other.price;
+    }
+
+    /**
      * Повертає назву.
      *
      * @return назва
