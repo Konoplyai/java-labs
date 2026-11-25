@@ -11,11 +11,12 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Збереження одягу в текстовий файл (за замовчуванням input.txt).
- * Кожен об'єкт записується в окремий рядок, значення розділяються символом ';'.
- * Перше значення - назва класу, далі поля в порядку {@link ClothesRecord#keysFor(String)}.
- * Порожні рядки і рядки, що починаються з '#', пропускаються. Некоректні рядки
- * та повтори не зупиняють читання, а потрапляють у список помилок.
+ * Збереження товарів магазину в текстовий файл (за замовчуванням input.txt).
+ * Кожен товар записується в окремий рядок, значення розділяються символом ';'.
+ * Перше значення - назва класу, далі поля в порядку {@link ClothesRecord#keysFor(String)},
+ * останнє значення - кількість товару. Порожні рядки і рядки, що починаються з '#',
+ * пропускаються. Некоректні рядки не зупиняють читання, а потрапляють у список помилок.
+ * Якщо товар повторюється, його кількість додається до вже прочитаної.
  */
 public class TextFileStorage implements ClothesStorage {
 
@@ -54,18 +55,19 @@ public class TextFileStorage implements ClothesStorage {
     }
 
     /**
-     * Зчитує одяг з файлу.
+     * Зчитує товари з файлу і додає їх у магазин.
      *
+     * @param store магазин
      * @param errors список, у який додаються повідомлення про пропущені рядки
-     * @return список прочитаних об'єктів
+     * @return кількість прочитаних рядків з товарами
      * @throws IOException якщо файл не вдалося прочитати
      */
     @Override
-    public List<Clothes> load(List<String> errors) throws IOException {
-        List<Clothes> items = new ArrayList<>();
+    public int load(Store store, List<String> errors) throws IOException {
+        int count = 0;
         if (!Files.exists(file)) {
-            errors.add("файл " + file + " не знайдено, список порожній");
-            return items;
+            errors.add("файл " + file + " не знайдено, магазин порожній");
+            return count;
         }
         List<String> lines = Files.readAllLines(file, StandardCharsets.UTF_8);
         for (int i = 0; i < lines.size(); i++) {
@@ -77,35 +79,36 @@ public class TextFileStorage implements ClothesStorage {
                 continue;
             }
             try {
-                Clothes clothes = parseLine(line);
-                if (items.contains(clothes)) {
-                    errors.add("рядок " + (i + 1) + ": така річ уже є, рядок пропущено");
-                } else {
-                    items.add(clothes);
+                int last = line.lastIndexOf(SEPARATOR);
+                if (last == -1) {
+                    throw new InvalidClothesException("рядок має містити значення через ';'");
                 }
+                int quantity = parseQuantity(line.substring(last + 1));
+                store.addNewClothes(parseLine(line.substring(0, last)), quantity);
+                count++;
             } catch (InvalidClothesException e) {
                 errors.add("рядок " + (i + 1) + ": " + e.getMessage() + ", рядок пропущено");
             }
         }
-        return items;
+        return count;
     }
 
     /**
-     * Записує весь список одягу у файл. Попередній вміст файлу перед цим
+     * Записує всі товари магазину у файл. Попередній вміст файлу перед цим
      * зберігається в копію з розширенням .bak, щоб не втратити пропущені рядки.
      *
-     * @param items список одягу
+     * @param store магазин
      * @throws IOException якщо файл не вдалося записати
      */
     @Override
-    public void save(List<Clothes> items) throws IOException {
+    public void save(Store store) throws IOException {
         if (Files.exists(file)) {
             Files.copy(file, Paths.get(file + BACKUP_SUFFIX), StandardCopyOption.REPLACE_EXISTING);
         }
         List<String> lines = new ArrayList<>();
-        lines.add(COMMENT + " тип;назва;бренд;розмір;колір;матеріал;рік;ціна;додаткові поля типу");
-        for (Clothes clothes : items) {
-            lines.add(formatLine(clothes));
+        lines.add(COMMENT + " тип;назва;бренд;розмір;колір;матеріал;рік;ціна;додаткові поля типу;кількість");
+        for (Clothes clothes : store.getClothes()) {
+            lines.add(formatLine(clothes) + SEPARATOR + store.getQuantity(clothes));
         }
         Files.write(file, lines, StandardCharsets.UTF_8);
     }
@@ -121,7 +124,22 @@ public class TextFileStorage implements ClothesStorage {
     }
 
     /**
-     * Створює об'єкт з рядка файлу.
+     * Перетворює текст у кількість товару.
+     *
+     * @param text текст
+     * @return кількість
+     * @throws InvalidClothesException якщо текст не є цілим числом
+     */
+    public static int parseQuantity(String text) {
+        try {
+            return Integer.parseInt(text.trim());
+        } catch (NumberFormatException e) {
+            throw new InvalidClothesException("кількість має бути цілим числом, а не \"" + text + "\"");
+        }
+    }
+
+    /**
+     * Створює об'єкт з рядка файлу (рядок без кількості).
      *
      * @param line рядок зі значеннями через ';'
      * @return створений об'єкт

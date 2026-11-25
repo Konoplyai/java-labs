@@ -7,7 +7,8 @@
     "color": "сірий",
     "material": "WOOL",
     "year": 2021,
-    "price": 1299.0
+    "price": 1299.0,
+    "quantity": 5
   },
   {
     "type": "Pants",
@@ -19,7 +20,8 @@
     "year": 2022,
     "price": 1899.0,
     "waist": 80,
-    "length": 104
+    "length": 104,
+    "quantity": 3
   },
   {
     "type": "Jeans",
@@ -33,7 +35,8 @@
     "waist": 82,
     "length": 102,
     "fit": "SLIM",
-    "density": 13
+    "density": 13,
+    "quantity": 4
   },
   {
     "type": "Shirts",
@@ -45,7 +48,8 @@
     "year": 2024,
     "price": 999.0,
     "sleeve": "SHORT",
-    "collar": 41
+    "collar": 41,
+    "quantity": 6
   },
   {
     "type": "FormalShirt",
@@ -59,6 +63,7 @@
     "sleeve": "LONG",
     "collar": 40,
     "cufflinks": true,
-    "nonIron": false
+    "nonIron": false,
+    "quantity": 2
   }
 ]
