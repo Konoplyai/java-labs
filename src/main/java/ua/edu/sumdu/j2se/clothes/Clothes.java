@@ -13,9 +13,6 @@ public class Clothes {
     /** Максимальна довжина текстових полів. */
     public static final int MAX_TEXT_LENGTH = 50;
 
-    /** Скільки об'єктів Clothes було успішно створено за час роботи програми. */
-    private static int createdCount = 0;
-
     private String name;
     private String brand;
     private Size size;
@@ -45,7 +42,6 @@ public class Clothes {
         setMaterial(material);
         setReleaseYear(releaseYear);
         setPrice(price);
-        createdCount++;
     }
 
     /**
@@ -65,16 +61,6 @@ public class Clothes {
         this.material = other.material;
         this.releaseYear = other.releaseYear;
         this.price = other.price;
-        createdCount++;
-    }
-
-    /**
-     * Повертає кількість створених об'єктів (звичайним конструктором і конструктором копіювання).
-     *
-     * @return кількість створених об'єктів
-     */
-    public static int getCreatedCount() {
-        return createdCount;
     }
 
     /**

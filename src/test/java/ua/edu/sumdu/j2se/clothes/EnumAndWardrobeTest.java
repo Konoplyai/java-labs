@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Тести конструктора копіювання, статичного лічильника, enum і класу Wardrobe.
+ * Тести конструктора копіювання, enum і класу Wardrobe.
  */
 class EnumAndWardrobeTest {
 
@@ -35,22 +35,6 @@ class EnumAndWardrobeTest {
     @Test
     void copyConstructorShouldThrowExceptionForNull() {
         assertThrows(InvalidClothesException.class, () -> new Clothes((Clothes) null));
-    }
-
-    @Test
-    void counterShouldGrowForEveryCreatedObject() {
-        int before = Clothes.getCreatedCount();
-        Clothes clothes = validClothes();
-        new Clothes(clothes);
-        assertEquals(before + 2, Clothes.getCreatedCount());
-    }
-
-    @Test
-    void counterShouldNotGrowWhenDataInvalid() {
-        int before = Clothes.getCreatedCount();
-        assertThrows(InvalidClothesException.class,
-                () -> new Clothes("", "H&M", Size.L, "сірий", Material.WOOL, 2021, 1299));
-        assertEquals(before, Clothes.getCreatedCount());
     }
 
     @Test

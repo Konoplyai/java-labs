@@ -55,9 +55,8 @@ public class ClothesDriver {
             System.out.println("1. Створити новий одяг");
             System.out.println("2. Показати весь одяг");
             System.out.println("3. Скопіювати одяг");
-            System.out.println("4. Скільки створено об'єктів");
-            System.out.println("5. Вихід");
-            int choice = readInt(scanner, "Ваш вибір: ", 1, 5);
+            System.out.println("4. Вихід");
+            int choice = readInt(scanner, "Ваш вибір: ", 1, 4);
             switch (choice) {
                 case 1:
                     addClothes(scanner, wardrobe);
@@ -67,10 +66,6 @@ public class ClothesDriver {
                     break;
                 case 3:
                     copyClothes(scanner, wardrobe);
-                    break;
-                case 4:
-                    System.out.println("Створено об'єктів Clothes: " + Clothes.getCreatedCount()
-                            + ", у гардеробі: " + wardrobe.size());
                     break;
                 default:
                     System.out.println("Роботу завершено.");
