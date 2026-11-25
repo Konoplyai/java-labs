@@ -13,9 +13,6 @@ public class Clothes {
     /** Максимальна довжина текстових полів. */
     public static final int MAX_TEXT_LENGTH = 50;
 
-    /** Скільки об'єктів Clothes було успішно створено за час роботи програми. */
-    private static int createdCount = 0;
-
     private String name;
     private String brand;
     private Size size;
@@ -45,7 +42,6 @@ public class Clothes {
         setMaterial(material);
         setReleaseYear(releaseYear);
         setPrice(price);
-        createdCount++;
     }
 
     /**
@@ -65,16 +61,6 @@ public class Clothes {
         this.material = other.material;
         this.releaseYear = other.releaseYear;
         this.price = other.price;
-        createdCount++;
-    }
-
-    /**
-     * Повертає кількість створених об'єктів (звичайним конструктором і конструктором копіювання).
-     *
-     * @return кількість створених об'єктів
-     */
-    public static int getCreatedCount() {
-        return createdCount;
     }
 
     /**
@@ -243,15 +229,34 @@ public class Clothes {
     }
 
     /**
+     * Повертає тип речі для виводу. Класи-нащадки перевизначають цей метод.
+     *
+     * @return назва типу
+     */
+    public String getType() {
+        return "Одяг";
+    }
+
+    /**
+     * Повертає спільні для всього одягу поля одним рядком.
+     * Використовується в toString() цього класу і класів-нащадків.
+     *
+     * @return поля базового класу
+     */
+    protected String baseInfo() {
+        return "назва='" + name + "', бренд='" + brand + "', розмір=" + size
+                + ", колір='" + color + "', матеріал=" + material.getTitle() + ", рік=" + releaseYear
+                + ", ціна=" + String.format("%.2f", price) + " грн";
+    }
+
+    /**
      * Повертає опис одягу одним рядком.
      *
      * @return рядок з усіма полями
      */
     @Override
     public String toString() {
-        return "Clothes{назва='" + name + "', бренд='" + brand + "', розмір=" + size
-                + ", колір='" + color + "', матеріал=" + material.getTitle() + ", рік=" + releaseYear
-                + ", ціна=" + String.format("%.2f", price) + " грн}";
+        return "Clothes{" + baseInfo() + "}";
     }
 
     /**
