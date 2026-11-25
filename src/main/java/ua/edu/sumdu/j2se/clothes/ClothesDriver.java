@@ -1,15 +1,15 @@
 package ua.edu.sumdu.j2se.clothes;
 
 import java.io.Console;
+import java.time.Year;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 /**
- * Драйвер: створює масив одягу, заповнює його з клавіатури та виводить.
+ * Драйвер з консольним меню: створення одягу, вивід усього списку, вихід.
  */
 public class ClothesDriver {
-
-    /** Максимальна кількість речей. */
-    public static final int MAX_COUNT = 20;
 
     /**
      * Закритий конструктор, бо клас містить лише статичні методи.
@@ -24,24 +24,42 @@ public class ClothesDriver {
      */
     public static void main(String[] args) {
         Scanner scanner = createScanner();
+        List<Clothes> wardrobe = new ArrayList<>();
         try {
-            int count = readInt(scanner, "Скільки речей додати (1-" + MAX_COUNT + "): ", 1, MAX_COUNT);
-            Clothes[] wardrobe = new Clothes[count];
-
-            for (int i = 0; i < wardrobe.length; i++) {
-                System.out.println("Річ " + (i + 1) + ":");
-                wardrobe[i] = readClothes(scanner);
-            }
-
-            System.out.println();
-            System.out.println("Усі речі:");
-            printAll(wardrobe);
-            printDuplicates(wardrobe);
+            runMenu(scanner, wardrobe);
         } catch (IllegalStateException e) {
             System.out.println();
             System.out.println("Помилка: " + e.getMessage() + ".");
         }
         scanner.close();
+    }
+
+    /**
+     * Показує меню та виконує вибрані дії, доки користувач не вибере вихід.
+     *
+     * @param scanner сканер
+     * @param wardrobe список одягу
+     */
+    public static void runMenu(Scanner scanner, List<Clothes> wardrobe) {
+        while (true) {
+            System.out.println();
+            System.out.println("Меню:");
+            System.out.println("1. Створити новий одяг");
+            System.out.println("2. Показати весь одяг");
+            System.out.println("3. Вихід");
+            int choice = readInt(scanner, "Ваш вибір: ", 1, 3);
+            switch (choice) {
+                case 1:
+                    addClothes(scanner, wardrobe);
+                    break;
+                case 2:
+                    printAll(wardrobe);
+                    break;
+                default:
+                    System.out.println("Роботу завершено.");
+                    return;
+            }
+        }
     }
 
     /**
@@ -58,48 +76,56 @@ public class ClothesDriver {
     }
 
     /**
+     * Зчитує дані нового одягу та додає його до списку.
+     * Якщо дані некоректні або така річ уже є, річ не додається.
+     *
+     * @param scanner сканер
+     * @param wardrobe список одягу
+     */
+    public static void addClothes(Scanner scanner, List<Clothes> wardrobe) {
+        try {
+            Clothes clothes = readClothes(scanner);
+            if (wardrobe.contains(clothes)) {
+                System.out.println("Така річ уже є в списку, не додано.");
+            } else {
+                wardrobe.add(clothes);
+                System.out.println("Додано: " + clothes);
+            }
+        } catch (InvalidClothesException e) {
+            System.out.println("Помилка: " + e.getMessage() + ". Річ не додано.");
+        }
+    }
+
+    /**
      * Зчитує з клавіатури дані однієї речі.
      *
      * @param scanner сканер
      * @return створений об'єкт одягу
+     * @throws InvalidClothesException якщо дані не пройшли перевірку в класі Clothes
      */
     public static Clothes readClothes(Scanner scanner) {
         String name = readText(scanner, "  назва: ");
         String brand = readText(scanner, "  бренд: ");
         String size = readSize(scanner, "  розмір (" + String.join(", ", Clothes.SIZES) + "): ");
         String color = readText(scanner, "  колір: ");
+        String material = readText(scanner, "  матеріал: ");
+        int year = readInt(scanner, "  рік випуску: ", Clothes.MIN_YEAR, Year.now().getValue());
         double price = readPrice(scanner, "  ціна, грн: ");
-        return new Clothes(name, brand, size, color, price);
+        return new Clothes(name, brand, size, color, material, year, price);
     }
 
     /**
-     * Виводить усі речі масиву через toString().
+     * Виводить усі речі через toString().
      *
-     * @param wardrobe масив одягу
+     * @param wardrobe список одягу
      */
-    public static void printAll(Clothes[] wardrobe) {
-        for (int i = 0; i < wardrobe.length; i++) {
-            System.out.println((i + 1) + ". " + wardrobe[i]);
+    public static void printAll(List<Clothes> wardrobe) {
+        if (wardrobe.isEmpty()) {
+            System.out.println("Список порожній.");
+            return;
         }
-    }
-
-    /**
-     * Шукає однакові речі в масиві за допомогою equals() і виводить їх номери.
-     *
-     * @param wardrobe масив одягу
-     */
-    public static void printDuplicates(Clothes[] wardrobe) {
-        boolean found = false;
-        for (int i = 0; i < wardrobe.length; i++) {
-            for (int j = i + 1; j < wardrobe.length; j++) {
-                if (wardrobe[i].equals(wardrobe[j])) {
-                    System.out.println("Однакові речі: " + (i + 1) + " і " + (j + 1));
-                    found = true;
-                }
-            }
-        }
-        if (!found) {
-            System.out.println("Однакових речей немає.");
+        for (int i = 0; i < wardrobe.size(); i++) {
+            System.out.println((i + 1) + ". " + wardrobe.get(i));
         }
     }
 
@@ -115,6 +141,10 @@ public class ClothesDriver {
     public static int readInt(Scanner scanner, String prompt, int min, int max) {
         while (true) {
             String line = readLine(scanner, prompt);
+            if (line.isEmpty()) {
+                System.out.println("  Помилка: значення не може бути порожнім.");
+                continue;
+            }
             try {
                 int value = Integer.parseInt(line);
                 if (value >= min && value <= max) {
@@ -171,6 +201,10 @@ public class ClothesDriver {
     public static double readPrice(Scanner scanner, String prompt) {
         while (true) {
             String line = readLine(scanner, prompt).replace(',', '.');
+            if (line.isEmpty()) {
+                System.out.println("  Помилка: значення не може бути порожнім.");
+                continue;
+            }
             try {
                 double value = Double.parseDouble(line);
                 if (value > 0 && !Double.isInfinite(value)) {
