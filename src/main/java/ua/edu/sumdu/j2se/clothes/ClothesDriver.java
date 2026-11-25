@@ -10,9 +10,14 @@ import java.util.Map;
 import java.util.Scanner;
 
 /**
- * Драйвер з консольним меню для роботи зі списком одягу.
+ * Драйвер з консольним меню для роботи з магазином одягу.
  */
 public class ClothesDriver {
+
+    /** Назва магазину. */
+    public static final String STORE_NAME = "Магазин одягу";
+    /** Адреса магазину. */
+    public static final String STORE_ADDRESS = "м. Суми";
 
     /**
      * Закритий конструктор, бо клас містить лише статичні методи.
@@ -21,8 +26,8 @@ public class ClothesDriver {
     }
 
     /**
-     * Точка входу в програму. На початку зчитує одяг з файлу,
-     * під час завершення записує актуальний список назад у цей самий файл.
+     * Точка входу в програму. На початку зчитує товари з файлу в магазин,
+     * під час завершення записує актуальні товари з кількістю назад у цей самий файл.
      *
      * @param args якщо перший аргумент "json", використовується файл input.json,
      *             інакше input.txt
@@ -30,15 +35,17 @@ public class ClothesDriver {
     public static void main(String[] args) {
         printHeader();
         ClothesStorage storage = createStorage(args);
-        List<Clothes> items = loadItems(storage);
+        Store store = new Store(STORE_NAME, STORE_ADDRESS);
+        System.out.println("Магазин: " + store.getName() + ", " + store.getAddress());
+        loadStore(storage, store);
         Scanner scanner = createScanner();
         try {
-            runMenu(scanner, items);
+            runMenu(scanner, store);
         } catch (IllegalStateException e) {
             System.out.println();
             System.out.println("Помилка: " + e.getMessage() + ".");
         }
-        saveItems(storage, items);
+        saveStore(storage, store);
         scanner.close();
     }
 
@@ -56,36 +63,36 @@ public class ClothesDriver {
     }
 
     /**
-     * Зчитує одяг зі сховища і виводить повідомлення про пропущені записи.
+     * Зчитує товари зі сховища в магазин і виводить повідомлення про пропущені записи.
      *
      * @param storage сховище
-     * @return список одягу (порожній, якщо прочитати не вдалося)
+     * @param store магазин
      */
-    public static List<Clothes> loadItems(ClothesStorage storage) {
-        List<Clothes> items = new ArrayList<>();
+    public static void loadStore(ClothesStorage storage, Store store) {
         List<String> errors = new ArrayList<>();
+        int count = 0;
         try {
-            items = storage.load(errors);
+            count = storage.load(store, errors);
         } catch (IOException e) {
             System.out.println("Не вдалося прочитати файл " + storage.getFileName() + ": " + e.getMessage());
         }
         for (String error : errors) {
             System.out.println("  " + error);
         }
-        System.out.println("Зчитано з файлу " + storage.getFileName() + ": " + items.size() + " об'єкт(ів).");
-        return items;
+        System.out.println("Зчитано з файлу " + storage.getFileName() + ": " + count + " запис(ів), у магазині "
+                + store.size() + " товар(ів), " + store.getTotalQuantity() + " шт.");
     }
 
     /**
-     * Записує весь список одягу у сховище.
+     * Записує всі товари магазину у сховище.
      *
      * @param storage сховище
-     * @param items список одягу
+     * @param store магазин
      */
-    public static void saveItems(ClothesStorage storage, List<Clothes> items) {
+    public static void saveStore(ClothesStorage storage, Store store) {
         try {
-            storage.save(items);
-            System.out.println("Записано у файл " + storage.getFileName() + ": " + items.size() + " об'єкт(ів).");
+            storage.save(store);
+            System.out.println("Записано у файл " + storage.getFileName() + ": " + store.size() + " товар(ів).");
         } catch (IOException e) {
             System.out.println("Не вдалося записати файл " + storage.getFileName() + ": " + e.getMessage());
         }
@@ -95,7 +102,7 @@ public class ClothesDriver {
      * Виводить інформаційну шапку програми.
      */
     public static void printHeader() {
-        System.out.println("Практична робота №10, варіант 1 (одяг, пошук у колекції)");
+        System.out.println("Практична робота №11, варіант 1 (магазин одягу)");
         System.out.println("Виконав: Конопля Іван, група Ін-42/1");
     }
 
@@ -103,26 +110,26 @@ public class ClothesDriver {
      * Показує головне меню та виконує вибрані дії, доки користувач не вибере вихід.
      *
      * @param scanner сканер
-     * @param items список одягу
+     * @param store магазин
      */
-    public static void runMenu(Scanner scanner, List<Clothes> items) {
+    public static void runMenu(Scanner scanner, Store store) {
         while (true) {
             System.out.println();
             System.out.println("Меню:");
-            System.out.println("1. Пошук об'єкта");
-            System.out.println("2. Створити новий об'єкт");
-            System.out.println("3. Вивести інформацію про всі об'єкти");
+            System.out.println("1. Пошук товару");
+            System.out.println("2. Додати товар");
+            System.out.println("3. Вивести всі товари");
             System.out.println("4. Завершити роботу");
             int choice = readInt(scanner, "Ваш вибір: ", 1, 4);
             switch (choice) {
                 case 1:
-                    searchMenu(scanner, items);
+                    searchMenu(scanner, store);
                     break;
                 case 2:
-                    createObject(scanner, items);
+                    createObject(scanner, store);
                     break;
                 case 3:
-                    printAll(items);
+                    printAll(store);
                     break;
                 default:
                     System.out.println("Роботу завершено.");
@@ -133,12 +140,13 @@ public class ClothesDriver {
 
     /**
      * Підменю пошуку: користувач вибирає критерій, вводить значення і бачить результат.
-     * Пункт 0 повертає до головного меню. Колекція під час пошуку не змінюється.
+     * Пункт 0 повертає до головного меню. Пошук виконують методи класу Store,
+     * колекція магазину при цьому не змінюється.
      *
      * @param scanner сканер
-     * @param items список одягу
+     * @param store магазин
      */
-    public static void searchMenu(Scanner scanner, List<Clothes> items) {
+    public static void searchMenu(Scanner scanner, Store store) {
         while (true) {
             System.out.println();
             System.out.println("Пошук за:");
@@ -151,23 +159,23 @@ public class ClothesDriver {
             List<Clothes> found;
             switch (choice) {
                 case 1:
-                    found = findByName(items, readText(scanner, "  текст для пошуку в назві: "));
+                    found = store.findByName(readText(scanner, "  текст для пошуку в назві: "));
                     break;
                 case 2:
-                    found = findByType(items, readType(scanner));
+                    found = store.findByType(readType(scanner));
                     break;
                 case 3:
                     double min = readPrice(scanner, "  ціна від, грн: ");
                     double max = readMaxPrice(scanner, min);
-                    found = findByPriceRange(items, min, max);
+                    found = store.findByPriceRange(min, max);
                     break;
                 case 4:
-                    found = findBySize(items, readSize(scanner, "  розмір (" + Size.list() + "): "));
+                    found = store.findBySize(readSize(scanner, "  розмір (" + Size.list() + "): "));
                     break;
                 default:
                     return;
             }
-            printSearchResult(found);
+            printSearchResult(store, found);
         }
     }
 
@@ -216,30 +224,33 @@ public class ClothesDriver {
     }
 
     /**
-     * Виводить результат пошуку або повідомлення, що нічого не знайдено.
+     * Виводить результат пошуку з кількістю кожного товару
+     * або повідомлення, що нічого не знайдено.
      *
-     * @param found знайдені речі
+     * @param store магазин
+     * @param found знайдені товари
      */
-    public static void printSearchResult(List<Clothes> found) {
+    public static void printSearchResult(Store store, List<Clothes> found) {
         if (found.isEmpty()) {
-            System.out.println("Жоден об'єкт не відповідає умовам пошуку.");
+            System.out.println("Жоден товар не відповідає умовам пошуку.");
             return;
         }
         System.out.println("Знайдено: " + found.size());
         for (int i = 0; i < found.size(); i++) {
             Clothes clothes = found.get(i);
-            System.out.println((i + 1) + ". " + clothes.getType() + ": " + clothes);
+            System.out.println((i + 1) + ". " + clothes.getType() + ": " + clothes
+                    + ", в наявності " + store.getQuantity(clothes) + " шт.");
         }
     }
 
     /**
-     * Пропонує вибрати тип нового об'єкта, зчитує його дані та додає до списку.
+     * Пропонує вибрати тип нового товару, зчитує його дані і кількість та додає в магазин.
      * Пункт 0 повертає до головного меню без створення об'єкта.
      *
      * @param scanner сканер
-     * @param items список одягу
+     * @param store магазин
      */
-    public static void createObject(Scanner scanner, List<Clothes> items) {
+    public static void createObject(Scanner scanner, Store store) {
         System.out.println("Оберіть тип:");
         System.out.println("1. Одяг");
         System.out.println("2. Штани");
@@ -270,7 +281,8 @@ public class ClothesDriver {
                     clothes = readFormalShirt(scanner);
                     break;
             }
-            addToList(items, clothes);
+            int quantity = readInt(scanner, "  кількість, шт.: ", 1, Store.MAX_QUANTITY);
+            addToStore(store, clothes, quantity);
         } catch (InvalidClothesException e) {
             System.out.println("Помилка: " + e.getMessage() + ". Об'єкт не створено.");
         }
@@ -349,17 +361,18 @@ public class ClothesDriver {
     }
 
     /**
-     * Додає річ до списку, якщо такої ще немає, і повідомляє результат.
+     * Додає товар у магазин методом addNewClothes і повідомляє результат.
      *
-     * @param items список одягу
-     * @param clothes річ
+     * @param store магазин
+     * @param clothes товар
+     * @param quantity кількість
+     * @throws InvalidClothesException якщо загальна кількість перевищить допустиму
      */
-    private static void addToList(List<Clothes> items, Clothes clothes) {
-        if (items.contains(clothes)) {
-            System.out.println("Така річ уже є в списку, не додано.");
+    private static void addToStore(Store store, Clothes clothes, int quantity) {
+        if (store.addNewClothes(clothes, quantity)) {
+            System.out.println("Додано новий товар: " + clothes + ", " + quantity + " шт.");
         } else {
-            items.add(clothes);
-            System.out.println("Додано: " + clothes);
+            System.out.println("Такий товар уже є, кількість збільшено до " + store.getQuantity(clothes) + " шт.");
         }
     }
 
@@ -382,26 +395,26 @@ public class ClothesDriver {
     }
 
     /**
-     * Виводить усі речі зі спільного списку. Для кожного об'єкта через посилання
+     * Виводить усі товари магазину з кількістю. Для кожного об'єкта через посилання
      * типу Clothes викликаються getType(), toString() і getCareInstructions(),
      * а виконується версія методу з реального класу об'єкта (поліморфізм).
      *
-     * @param items список одягу
+     * @param store магазин
      */
-    public static void printAll(List<Clothes> items) {
-        if (items.isEmpty()) {
-            System.out.println("Список порожній.");
+    public static void printAll(Store store) {
+        if (store.isEmpty()) {
+            System.out.println("У магазині немає товарів.");
             return;
         }
+        List<Clothes> items = store.getClothes();
         Map<String, Integer> byType = new LinkedHashMap<>();
-        double total = 0;
         for (int i = 0; i < items.size(); i++) {
             Clothes clothes = items.get(i);
-            System.out.println((i + 1) + ". " + clothes.getType() + ": " + clothes);
+            int quantity = store.getQuantity(clothes);
+            System.out.println((i + 1) + ". " + clothes.getType() + ": " + clothes + ", " + quantity + " шт.");
             System.out.println("   догляд: " + clothes.getCareInstructions());
             Integer count = byType.get(clothes.getType());
-            byType.put(clothes.getType(), count == null ? 1 : count + 1);
-            total += clothes.getPrice();
+            byType.put(clothes.getType(), count == null ? quantity : count + quantity);
         }
         StringBuilder types = new StringBuilder();
         for (Map.Entry<String, Integer> entry : byType.entrySet()) {
@@ -410,81 +423,9 @@ public class ClothesDriver {
             }
             types.append(entry.getKey()).append(" - ").append(entry.getValue());
         }
-        System.out.println("Усього речей: " + items.size() + ", загальна вартість: "
-                + String.format("%.2f", total) + " грн");
-        System.out.println("За типами: " + types);
-    }
-
-    /**
-     * Шукає речі, назва яких містить заданий текст (без урахування регістру).
-     * Колекція не змінюється, результат повертається в новому списку.
-     *
-     * @param items список одягу
-     * @param text частина назви
-     * @return знайдені речі (порожній список, якщо нічого не знайдено)
-     */
-    public static List<Clothes> findByName(List<Clothes> items, String text) {
-        List<Clothes> result = new ArrayList<>();
-        String query = text.trim().toLowerCase();
-        for (Clothes clothes : items) {
-            if (clothes.getName().toLowerCase().contains(query)) {
-                result.add(clothes);
-            }
-        }
-        return result;
-    }
-
-    /**
-     * Шукає речі заданого класу, включно з його нащадками
-     * (наприклад, пошук штанів знаходить і джинси).
-     *
-     * @param items список одягу
-     * @param type клас, об'єкти якого потрібно знайти
-     * @return знайдені речі (порожній список, якщо нічого не знайдено)
-     */
-    public static List<Clothes> findByType(List<Clothes> items, Class<? extends Clothes> type) {
-        List<Clothes> result = new ArrayList<>();
-        for (Clothes clothes : items) {
-            if (type.isInstance(clothes)) {
-                result.add(clothes);
-            }
-        }
-        return result;
-    }
-
-    /**
-     * Шукає речі з ціною в заданих межах (межі включаються).
-     *
-     * @param items список одягу
-     * @param min найменша ціна, грн
-     * @param max найбільша ціна, грн
-     * @return знайдені речі (порожній список, якщо нічого не знайдено)
-     */
-    public static List<Clothes> findByPriceRange(List<Clothes> items, double min, double max) {
-        List<Clothes> result = new ArrayList<>();
-        for (Clothes clothes : items) {
-            if (clothes.getPrice() >= min && clothes.getPrice() <= max) {
-                result.add(clothes);
-            }
-        }
-        return result;
-    }
-
-    /**
-     * Шукає речі заданого розміру.
-     *
-     * @param items список одягу
-     * @param size розмір
-     * @return знайдені речі (порожній список, якщо нічого не знайдено)
-     */
-    public static List<Clothes> findBySize(List<Clothes> items, Size size) {
-        List<Clothes> result = new ArrayList<>();
-        for (Clothes clothes : items) {
-            if (clothes.getSize() == size) {
-                result.add(clothes);
-            }
-        }
-        return result;
+        System.out.println("Усього товарів: " + store.size() + ", одиниць: " + store.getTotalQuantity()
+                + ", загальна вартість: " + String.format("%.2f", store.getTotalValue()) + " грн");
+        System.out.println("Одиниць за типами: " + types);
     }
 
     /**

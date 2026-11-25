@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * Сховище для списку одягу (файл певного формату).
+ * Сховище товарів магазину (файл певного формату).
  */
 public interface ClothesStorage {
 
@@ -16,20 +16,21 @@ public interface ClothesStorage {
     String getFileName();
 
     /**
-     * Зчитує одяг з файлу. Некоректні записи пропускаються,
-     * а опис кожної проблеми додається до списку errors.
+     * Зчитує товари з файлу і додає їх у магазин методом {@link Store#addNewClothes(Clothes, int)}.
+     * Некоректні записи пропускаються, а опис кожної проблеми додається до списку errors.
      *
+     * @param store магазин, у який додаються товари
      * @param errors список, у який додаються повідомлення про пропущені записи
-     * @return список прочитаних об'єктів (порожній, якщо файлу немає)
+     * @return кількість прочитаних записів
      * @throws IOException якщо файл не вдалося прочитати
      */
-    List<Clothes> load(List<String> errors) throws IOException;
+    int load(Store store, List<String> errors) throws IOException;
 
     /**
-     * Записує весь список одягу у файл (старий вміст замінюється).
+     * Записує всі товари магазину разом з кількістю у файл (старий вміст замінюється).
      *
-     * @param items список одягу
+     * @param store магазин
      * @throws IOException якщо файл не вдалося записати
      */
-    void save(List<Clothes> items) throws IOException;
+    void save(Store store) throws IOException;
 }

@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Тести збереження одягу у файли input.txt і input.json.
+ * Тести збереження товарів магазину у файли input.txt і input.json.
  */
 class FileStorageTest {
 
@@ -24,43 +24,73 @@ class FileStorageTest {
     Path dir;
 
     /**
-     * Створює список з об'єктів усіх п'яти класів ієрархії.
+     * Створює магазин з об'єктами всіх п'яти класів ієрархії, кількість у кожного різна.
      *
-     * @return список одягу
+     * @return магазин
      */
-    private List<Clothes> sample() {
+    private Store sample() {
         Clothes base = new Clothes("Светр", "H&M", Size.L, "сірий", Material.WOOL, 2021, 1299.5);
         Pants pants = new Pants(base, 80, 104);
         Shirts shirts = new Shirts(base, Sleeve.LONG, 40);
-        List<Clothes> items = new ArrayList<>();
-        items.add(base);
-        items.add(pants);
-        items.add(new Jeans(pants, Fit.SLIM, 13));
-        items.add(shirts);
-        items.add(new FormalShirt(shirts, true, false));
-        return items;
+        Store store = new Store("Магазин одягу", "м. Суми");
+        store.addNewClothes(base, 1);
+        store.addNewClothes(pants, 2);
+        store.addNewClothes(new Jeans(pants, Fit.SLIM, 13), 3);
+        store.addNewClothes(shirts, 4);
+        store.addNewClothes(new FormalShirt(shirts, true, false), 5);
+        return store;
+    }
+
+    /**
+     * Перевіряє, що в магазинах однакові товари з однаковою кількістю.
+     *
+     * @param expected очікуваний магазин
+     * @param actual прочитаний магазин
+     */
+    private void assertSameGoods(Store expected, Store actual) {
+        assertEquals(expected.getClothes(), actual.getClothes());
+        for (Clothes clothes : expected.getClothes()) {
+            assertEquals(expected.getQuantity(clothes), actual.getQuantity(clothes));
+        }
     }
 
     @Test
-    void textFileShouldRestoreSameObjects() throws IOException {
+    void textFileShouldRestoreSameGoods() throws IOException {
         TextFileStorage storage = new TextFileStorage(dir.resolve("input.txt").toString());
         storage.save(sample());
         List<String> errors = new ArrayList<>();
-        List<Clothes> loaded = storage.load(errors);
-        assertEquals(sample(), loaded);
+        Store loaded = new Store("Магазин одягу", "м. Суми");
+        assertEquals(5, storage.load(loaded, errors));
+        assertSameGoods(sample(), loaded);
         assertTrue(errors.isEmpty());
-        assertTrue(loaded.get(2) instanceof Jeans);
+        assertTrue(loaded.getClothes().get(2) instanceof Jeans);
     }
 
     @Test
-    void jsonFileShouldRestoreSameObjects() throws IOException {
+    void jsonFileShouldRestoreSameGoods() throws IOException {
         JsonFileStorage storage = new JsonFileStorage(dir.resolve("input.json").toString());
         storage.save(sample());
         List<String> errors = new ArrayList<>();
-        List<Clothes> loaded = storage.load(errors);
-        assertEquals(sample(), loaded);
+        Store loaded = new Store("Магазин одягу", "м. Суми");
+        assertEquals(5, storage.load(loaded, errors));
+        assertSameGoods(sample(), loaded);
         assertTrue(errors.isEmpty());
-        assertTrue(loaded.get(4) instanceof FormalShirt);
+        assertTrue(loaded.getClothes().get(4) instanceof FormalShirt);
+    }
+
+    @Test
+    void repeatedLineShouldIncreaseQuantity() throws IOException {
+        Path file = dir.resolve("input.txt");
+        Files.write(file, Arrays.asList(
+                "Clothes;Футболка;Nike;M;білий;COTTON;2022;450;3",
+                "Pants;Шорти;Puma;M;сірий;COTTON;2023;700;80;50;1",
+                "Clothes;Футболка;Nike;M;білий;COTTON;2022;450;4"), StandardCharsets.UTF_8);
+        Store store = new Store("Магазин одягу", "м. Суми");
+        List<String> errors = new ArrayList<>();
+        assertEquals(3, new TextFileStorage(file.toString()).load(store, errors));
+        assertTrue(errors.isEmpty());
+        assertEquals(2, store.size());
+        assertEquals(7, store.getQuantity(store.getClothes().get(0)));
     }
 
     @Test
@@ -69,22 +99,41 @@ class FileStorageTest {
         Files.write(file, Arrays.asList(
                 "# коментар",
                 "",
+                "Clothes;Футболка;Nike;M;білий;COTTON;2022;450;2",
+                "Hat;Кепка;Nike;S;червоний;COTTON;2022;450;1",
+                "Clothes;Футболка;Nike;XXXL;білий;COTTON;2022;450;1",
+                "Pants;Шорти;Puma;M;сірий;COTTON;2023;abc;80;50;1",
                 "Clothes;Футболка;Nike;M;білий;COTTON;2022;450",
-                "Hat;Кепка;Nike;S;червоний;COTTON;2022;450",
-                "Clothes;Футболка;Nike;XXXL;білий;COTTON;2022;450",
-                "Pants;Шорти;Puma;M;сірий;COTTON;2023;abc;80;50",
-                "Clothes;Футболка;Nike;M;білий;COTTON;2022;450"), StandardCharsets.UTF_8);
+                "Clothes;Футболка;Nike;M;білий;COTTON;2022;450;0",
+                "Clothes;Футболка;Nike;M;білий;COTTON;2022;450;багато",
+                "Футболка"), StandardCharsets.UTF_8);
+        Store store = new Store("Магазин одягу", "м. Суми");
         List<String> errors = new ArrayList<>();
-        List<Clothes> loaded = new TextFileStorage(file.toString()).load(errors);
-        assertEquals(1, loaded.size());
-        assertEquals(4, errors.size());
+        assertEquals(1, new TextFileStorage(file.toString()).load(store, errors));
+        assertEquals(1, store.size());
+        assertEquals(2, store.getTotalQuantity());
+        assertEquals(7, errors.size());
     }
 
     @Test
-    void missingFileShouldGiveEmptyList() throws IOException {
+    void jsonWithoutQuantityShouldBeSkipped() throws IOException {
+        Path file = dir.resolve("input.json");
+        Files.write(file, ("[{\"type\":\"Clothes\",\"name\":\"Футболка\",\"brand\":\"Nike\",\"size\":\"M\","
+                + "\"color\":\"білий\",\"material\":\"COTTON\",\"year\":2022,\"price\":450}]")
+                .getBytes(StandardCharsets.UTF_8));
+        Store store = new Store("Магазин одягу", "м. Суми");
         List<String> errors = new ArrayList<>();
-        List<Clothes> loaded = new TextFileStorage(dir.resolve("none.txt").toString()).load(errors);
-        assertTrue(loaded.isEmpty());
+        assertEquals(0, new JsonFileStorage(file.toString()).load(store, errors));
+        assertTrue(store.isEmpty());
+        assertEquals(1, errors.size());
+    }
+
+    @Test
+    void missingFileShouldGiveEmptyStore() throws IOException {
+        List<String> errors = new ArrayList<>();
+        Store store = new Store("Магазин одягу", "м. Суми");
+        assertEquals(0, new TextFileStorage(dir.resolve("none.txt").toString()).load(store, errors));
+        assertTrue(store.isEmpty());
         assertEquals(1, errors.size());
     }
 
@@ -92,7 +141,8 @@ class FileStorageTest {
     void brokenJsonShouldThrowIOException() throws IOException {
         Path file = dir.resolve("input.json");
         Files.write(file, "{oops".getBytes(StandardCharsets.UTF_8));
-        assertThrows(IOException.class, () -> new JsonFileStorage(file.toString()).load(new ArrayList<>()));
+        Store store = new Store("Магазин одягу", "м. Суми");
+        assertThrows(IOException.class, () -> new JsonFileStorage(file.toString()).load(store, new ArrayList<>()));
     }
 
     @Test

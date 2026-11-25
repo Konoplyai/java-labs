@@ -19,8 +19,9 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Збереження одягу у файл формату JSON (за замовчуванням input.json) за допомогою бібліотеки Gson.
- * Файл містить масив об'єктів; поле "type" визначає клас, який треба створити.
+ * Збереження товарів магазину у файл формату JSON (за замовчуванням input.json) за допомогою бібліотеки Gson.
+ * Файл містить масив об'єктів; поле "type" визначає клас, який треба створити,
+ * поле "quantity" - кількість товару.
  * Об'єкти створюються через конструктори, тому всі значення проходять перевірку.
  */
 public class JsonFileStorage implements ClothesStorage {
@@ -30,6 +31,8 @@ public class JsonFileStorage implements ClothesStorage {
 
     /** Поля, які записуються як цілі числа. */
     private static final List<String> INT_KEYS = Arrays.asList("year", "waist", "length", "density", "collar");
+    /** Поле з кількістю товару. */
+    public static final String QUANTITY = "quantity";
     /** Поля, які записуються як логічні значення. */
     private static final List<String> BOOLEAN_KEYS = Arrays.asList("cufflinks", "nonIron");
 
@@ -60,25 +63,26 @@ public class JsonFileStorage implements ClothesStorage {
     }
 
     /**
-     * Зчитує одяг з JSON-файлу. Некоректні елементи масиву та повтори пропускаються.
+     * Зчитує товари з JSON-файлу і додає їх у магазин. Некоректні елементи масиву пропускаються.
      *
+     * @param store магазин
      * @param errors список, у який додаються повідомлення про пропущені елементи
-     * @return список прочитаних об'єктів
+     * @return кількість прочитаних елементів
      * @throws IOException якщо файл не вдалося прочитати або він не є JSON-масивом
      */
     @Override
-    public List<Clothes> load(List<String> errors) throws IOException {
-        List<Clothes> items = new ArrayList<>();
+    public int load(Store store, List<String> errors) throws IOException {
+        int count = 0;
         if (!Files.exists(file)) {
-            errors.add("файл " + file + " не знайдено, список порожній");
-            return items;
+            errors.add("файл " + file + " не знайдено, магазин порожній");
+            return count;
         }
         String text = new String(Files.readAllBytes(file), StandardCharsets.UTF_8);
         if (text.startsWith("﻿")) {
             text = text.substring(1);
         }
         if (text.trim().isEmpty()) {
-            return items;
+            return count;
         }
         JsonElement root;
         try {
@@ -93,32 +97,32 @@ public class JsonFileStorage implements ClothesStorage {
         for (int i = 0; i < array.size(); i++) {
             try {
                 Clothes clothes = fromJson(array.get(i));
-                if (items.contains(clothes)) {
-                    errors.add("елемент " + (i + 1) + ": така річ уже є, пропущено");
-                } else {
-                    items.add(clothes);
-                }
+                int quantity = TextFileStorage.parseQuantity(getValue(array.get(i).getAsJsonObject(), QUANTITY));
+                store.addNewClothes(clothes, quantity);
+                count++;
             } catch (InvalidClothesException e) {
                 errors.add("елемент " + (i + 1) + ": " + e.getMessage() + ", пропущено");
             }
         }
-        return items;
+        return count;
     }
 
     /**
-     * Записує весь список одягу у JSON-файл. Попередній вміст зберігається в копію .bak.
+     * Записує всі товари магазину у JSON-файл. Попередній вміст зберігається в копію .bak.
      *
-     * @param items список одягу
+     * @param store магазин
      * @throws IOException якщо файл не вдалося записати
      */
     @Override
-    public void save(List<Clothes> items) throws IOException {
+    public void save(Store store) throws IOException {
         if (Files.exists(file)) {
             Files.copy(file, Paths.get(file + TextFileStorage.BACKUP_SUFFIX), StandardCopyOption.REPLACE_EXISTING);
         }
         JsonArray array = new JsonArray();
-        for (Clothes clothes : items) {
-            array.add(toJson(clothes));
+        for (Clothes clothes : store.getClothes()) {
+            JsonObject object = toJson(clothes);
+            object.addProperty(QUANTITY, store.getQuantity(clothes));
+            array.add(object);
         }
         Files.write(file, gson.toJson(array).getBytes(StandardCharsets.UTF_8));
     }
