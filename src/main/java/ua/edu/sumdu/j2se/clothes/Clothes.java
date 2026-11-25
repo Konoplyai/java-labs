@@ -3,7 +3,7 @@ package ua.edu.sumdu.j2se.clothes;
 import java.util.Objects;
 
 /**
- * Одяг: назва, бренд, розмір, колір та ціна.
+ * Одяг: назва, бренд, розмір, колір, матеріал, рік випуску та ціна.
  */
 public class Clothes {
 
@@ -14,6 +14,8 @@ public class Clothes {
     private String brand;
     private String size;
     private String color;
+    private String material;
+    private int releaseYear;
     private double price;
 
     /**
@@ -23,14 +25,19 @@ public class Clothes {
      * @param brand бренд
      * @param size розмір (XS, S, M, L, XL, XXL)
      * @param color колір
+     * @param material матеріал
+     * @param releaseYear рік випуску
      * @param price ціна, грн
      * @throws IllegalArgumentException якщо якесь значення некоректне
      */
-    public Clothes(String name, String brand, String size, String color, double price) {
+    public Clothes(String name, String brand, String size, String color,
+                   String material, int releaseYear, double price) {
         setName(name);
         setBrand(brand);
         setSize(size);
         setColor(color);
+        setMaterial(material);
+        setReleaseYear(releaseYear);
         setPrice(price);
     }
 
@@ -114,6 +121,42 @@ public class Clothes {
     }
 
     /**
+     * Повертає матеріал.
+     *
+     * @return матеріал
+     */
+    public String getMaterial() {
+        return material;
+    }
+
+    /**
+     * Задає матеріал.
+     *
+     * @param material матеріал
+     */
+    public void setMaterial(String material) {
+        this.material = material;
+    }
+
+    /**
+     * Повертає рік випуску.
+     *
+     * @return рік випуску
+     */
+    public int getReleaseYear() {
+        return releaseYear;
+    }
+
+    /**
+     * Задає рік випуску.
+     *
+     * @param releaseYear рік випуску
+     */
+    public void setReleaseYear(int releaseYear) {
+        this.releaseYear = releaseYear;
+    }
+
+    /**
      * Повертає ціну.
      *
      * @return ціна, грн
@@ -175,7 +218,8 @@ public class Clothes {
     @Override
     public String toString() {
         return "Clothes{назва='" + name + "', бренд='" + brand + "', розмір=" + size
-                + ", колір='" + color + "', ціна=" + String.format("%.2f", price) + " грн}";
+                + ", колір='" + color + "', матеріал='" + material + "', рік=" + releaseYear
+                + ", ціна=" + String.format("%.2f", price) + " грн}";
     }
 
     /**
@@ -197,7 +241,9 @@ public class Clothes {
                 && Objects.equals(name, other.name)
                 && Objects.equals(brand, other.brand)
                 && Objects.equals(size, other.size)
-                && Objects.equals(color, other.color);
+                && Objects.equals(color, other.color)
+                && Objects.equals(material, other.material)
+                && releaseYear == other.releaseYear;
     }
 
     /**
@@ -207,6 +253,6 @@ public class Clothes {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(name, brand, size, color, price);
+        return Objects.hash(name, brand, size, color, material, releaseYear, price);
     }
 }

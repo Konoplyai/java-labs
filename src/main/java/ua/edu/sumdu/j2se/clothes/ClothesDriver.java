@@ -68,8 +68,10 @@ public class ClothesDriver {
         String brand = readText(scanner, "  бренд: ");
         String size = readSize(scanner, "  розмір (" + String.join(", ", Clothes.SIZES) + "): ");
         String color = readText(scanner, "  колір: ");
+        String material = readText(scanner, "  матеріал: ");
+        int year = readInt(scanner, "  рік випуску: ", 1900, 2100);
         double price = readPrice(scanner, "  ціна, грн: ");
-        return new Clothes(name, brand, size, color, price);
+        return new Clothes(name, brand, size, color, material, year, price);
     }
 
     /**
