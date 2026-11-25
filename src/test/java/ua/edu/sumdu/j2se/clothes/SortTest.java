@@ -128,7 +128,7 @@ class SortTest {
         Store store = new Store("Магазин одягу", "м. Суми");
         store.addNewClothes(sweater, 5);
         store.addNewClothes(trousers, 3);
-        String output = runMenu(store, "4\n1\n0\n7\n");
+        String output = runMenu(store, "6\n1\n0\n7\n");
         assertTrue(output.contains("1. Брюки"));
         assertTrue(output.contains("2. Светр"));
         assertTrue(output.indexOf("1. Брюки") < output.indexOf("2. Светр"));
@@ -136,7 +136,7 @@ class SortTest {
 
     @Test
     void menuShouldWorkWithEmptyStoreAndWrongInput() {
-        String output = runMenu(new Store("Магазин одягу", "м. Суми"), "abc\n\n9\n4\n1\n0\n7\n");
+        String output = runMenu(new Store("Магазин одягу", "м. Суми"), "abc\n\n9\n6\n1\n0\n7\n");
         assertTrue(output.contains("потрібно ввести ціле число"));
         assertTrue(output.contains("значення не може бути порожнім"));
         assertTrue(output.contains("число має бути від 1 до 7"));
