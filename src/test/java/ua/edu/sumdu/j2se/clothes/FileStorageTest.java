@@ -2,7 +2,6 @@ package ua.edu.sumdu.j2se.clothes;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.junit.jupiter.api.function.Executable;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -143,12 +142,7 @@ class FileStorageTest {
         Path file = dir.resolve("input.json");
         Files.write(file, "{oops".getBytes(StandardCharsets.UTF_8));
         Store store = new Store("Магазин одягу", "м. Суми");
-        assertThrows(IOException.class, new Executable() {
-            @Override
-            public void execute() throws Throwable {
-                new JsonFileStorage(file.toString()).load(store, new ArrayList<>());
-            }
-        });
+        assertThrows(IOException.class, () -> new JsonFileStorage(file.toString()).load(store, new ArrayList<>()));
     }
 
     @Test
@@ -162,11 +156,6 @@ class FileStorageTest {
     @Test
     void textShouldNotContainSeparator() {
         assertThrows(InvalidClothesException.class,
-                new Executable() {
-                    @Override
-                    public void execute() throws Throwable {
-                        new Sweater("a;b", "H&M", Size.L, "сірий", Material.WOOL, 2021, 100);
-                    }
-                });
+                () -> new Sweater("a;b", "H&M", Size.L, "сірий", Material.WOOL, 2021, 100));
     }
 }

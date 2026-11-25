@@ -1,7 +1,6 @@
 package ua.edu.sumdu.j2se.clothes;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.function.Executable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,54 +35,19 @@ class InheritanceTest {
 
     @Test
     void shouldThrowExceptionForInvalidPantsData() {
-        assertThrows(InvalidClothesException.class, new Executable() {
-            @Override
-            public void execute() throws Throwable {
-                new Pants(base(), 20, 100);
-            }
-        });
-        assertThrows(InvalidClothesException.class, new Executable() {
-            @Override
-            public void execute() throws Throwable {
-                new Pants(base(), 82, 200);
-            }
-        });
-        assertThrows(InvalidClothesException.class, new Executable() {
-            @Override
-            public void execute() throws Throwable {
-                new Pants(null, 82, 100);
-            }
-        });
+        assertThrows(InvalidClothesException.class, () -> new Pants(base(), 20, 100));
+        assertThrows(InvalidClothesException.class, () -> new Pants(base(), 82, 200));
+        assertThrows(InvalidClothesException.class, () -> new Pants(null, 82, 100));
         Pants pants = new Pants(base(), 82, 100);
-        assertThrows(InvalidClothesException.class, new Executable() {
-            @Override
-            public void execute() throws Throwable {
-                pants.setWaist(Pants.MAX_WAIST + 1);
-            }
-        });
+        assertThrows(InvalidClothesException.class, () -> pants.setWaist(Pants.MAX_WAIST + 1));
     }
 
     @Test
     void shouldThrowExceptionForInvalidShirtsData() {
-        assertThrows(InvalidClothesException.class, new Executable() {
-            @Override
-            public void execute() throws Throwable {
-                new Shirts(base(), null, 40);
-            }
-        });
-        assertThrows(InvalidClothesException.class, new Executable() {
-            @Override
-            public void execute() throws Throwable {
-                new Shirts(base(), Sleeve.LONG, 60);
-            }
-        });
+        assertThrows(InvalidClothesException.class, () -> new Shirts(base(), null, 40));
+        assertThrows(InvalidClothesException.class, () -> new Shirts(base(), Sleeve.LONG, 60));
         Shirts shirts = new Shirts(base(), Sleeve.SHORT, 40);
-        assertThrows(InvalidClothesException.class, new Executable() {
-            @Override
-            public void execute() throws Throwable {
-                shirts.setCollar(Shirts.MIN_COLLAR - 1);
-            }
-        });
+        assertThrows(InvalidClothesException.class, () -> shirts.setCollar(Shirts.MIN_COLLAR - 1));
     }
 
     @Test
