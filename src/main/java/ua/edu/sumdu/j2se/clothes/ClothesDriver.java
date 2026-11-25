@@ -39,7 +39,7 @@ public class ClothesDriver {
      * Виводить інформаційну шапку програми.
      */
     public static void printHeader() {
-        System.out.println("Практична робота №6, варіант 1 (клас Clothes)");
+        System.out.println("Практична робота №7, варіант 1 (Clothes, Pants, Shirts)");
         System.out.println("Виконав: Конопля Іван, група Ін-42/1");
     }
 
@@ -53,15 +53,23 @@ public class ClothesDriver {
         while (true) {
             System.out.println();
             System.out.println("Меню:");
-            System.out.println("1. Створити новий одяг");
-            System.out.println("2. Показати весь одяг");
-            System.out.println("3. Вихід");
-            int choice = readInt(scanner, "Ваш вибір: ", 1, 3);
+            System.out.println("1. Створити одяг");
+            System.out.println("2. Створити штани");
+            System.out.println("3. Створити сорочку");
+            System.out.println("4. Показати весь одяг");
+            System.out.println("5. Вихід");
+            int choice = readInt(scanner, "Ваш вибір: ", 1, 5);
             switch (choice) {
                 case 1:
                     addClothes(scanner, items);
                     break;
                 case 2:
+                    addPants(scanner, items);
+                    break;
+                case 3:
+                    addShirts(scanner, items);
+                    break;
+                case 4:
                     printAll(items);
                     break;
                 default:
@@ -96,6 +104,40 @@ public class ClothesDriver {
             addToList(items, readClothes(scanner));
         } catch (InvalidClothesException e) {
             System.out.println("Помилка: " + e.getMessage() + ". Річ не додано.");
+        }
+    }
+
+    /**
+     * Зчитує дані штанів та додає їх до списку.
+     *
+     * @param scanner сканер
+     * @param items список одягу
+     */
+    public static void addPants(Scanner scanner, List<Clothes> items) {
+        try {
+            Clothes base = readClothes(scanner);
+            int waist = readInt(scanner, "  обхват талії, см: ", Pants.MIN_WAIST, Pants.MAX_WAIST);
+            int length = readInt(scanner, "  довжина, см: ", Pants.MIN_LENGTH, Pants.MAX_LENGTH);
+            addToList(items, new Pants(base, waist, length));
+        } catch (InvalidClothesException e) {
+            System.out.println("Помилка: " + e.getMessage() + ". Штани не додано.");
+        }
+    }
+
+    /**
+     * Зчитує дані сорочки та додає її до списку.
+     *
+     * @param scanner сканер
+     * @param items список одягу
+     */
+    public static void addShirts(Scanner scanner, List<Clothes> items) {
+        try {
+            Clothes base = readClothes(scanner);
+            Sleeve sleeve = readSleeve(scanner, "  рукав (" + Sleeve.list() + "): ");
+            int collar = readInt(scanner, "  розмір коміра, см: ", Shirts.MIN_COLLAR, Shirts.MAX_COLLAR);
+            addToList(items, new Shirts(base, sleeve, collar));
+        } catch (InvalidClothesException e) {
+            System.out.println("Помилка: " + e.getMessage() + ". Сорочку не додано.");
         }
     }
 
@@ -206,6 +248,24 @@ public class ClothesDriver {
                 return Size.fromString(line);
             } catch (InvalidClothesException e) {
                 System.out.println("  Помилка: такого розміру немає.");
+            }
+        }
+    }
+
+    /**
+     * Зчитує довжину рукава зі списку допустимих.
+     *
+     * @param scanner сканер
+     * @param prompt підказка
+     * @return довжина рукава
+     */
+    public static Sleeve readSleeve(Scanner scanner, String prompt) {
+        while (true) {
+            String line = readLine(scanner, prompt);
+            try {
+                return Sleeve.fromString(line);
+            } catch (InvalidClothesException e) {
+                System.out.println("  Помилка: такого значення немає.");
             }
         }
     }
