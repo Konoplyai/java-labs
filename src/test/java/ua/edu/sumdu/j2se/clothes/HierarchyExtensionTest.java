@@ -1,7 +1,6 @@
 package ua.edu.sumdu.j2se.clothes;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.function.Executable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,25 +45,10 @@ class HierarchyExtensionTest {
 
     @Test
     void shouldThrowExceptionForInvalidJeansData() {
-        assertThrows(InvalidClothesException.class, new Executable() {
-            @Override
-            public void execute() throws Throwable {
-                new Jeans(pants(), null, 13);
-            }
-        });
-        assertThrows(InvalidClothesException.class, new Executable() {
-            @Override
-            public void execute() throws Throwable {
-                new Jeans(pants(), Fit.SLIM, 30);
-            }
-        });
+        assertThrows(InvalidClothesException.class, () -> new Jeans(pants(), null, 13));
+        assertThrows(InvalidClothesException.class, () -> new Jeans(pants(), Fit.SLIM, 30));
         Jeans jeans = new Jeans(pants(), Fit.SLIM, 13);
-        assertThrows(InvalidClothesException.class, new Executable() {
-            @Override
-            public void execute() throws Throwable {
-                jeans.setDensity(Jeans.MIN_DENSITY - 1);
-            }
-        });
+        assertThrows(InvalidClothesException.class, () -> jeans.setDensity(Jeans.MIN_DENSITY - 1));
     }
 
     @Test
@@ -77,12 +61,7 @@ class HierarchyExtensionTest {
     void cufflinksShouldBeOnlyOnLongSleeve() {
         Shirts shortShirt = new Shirts("Сорочка", "Arber", Size.L, "білий", Material.COTTON, 2024, 1500,
                 Sleeve.SHORT, 40);
-        assertThrows(InvalidClothesException.class, new Executable() {
-            @Override
-            public void execute() throws Throwable {
-                new FormalShirt(shortShirt, true, false);
-            }
-        });
+        assertThrows(InvalidClothesException.class, () -> new FormalShirt(shortShirt, true, false));
         FormalShirt formal = new FormalShirt(longShirt(), true, false);
         assertTrue(formal.hasCufflinks());
         formal.setSleeve(Sleeve.SHORT);

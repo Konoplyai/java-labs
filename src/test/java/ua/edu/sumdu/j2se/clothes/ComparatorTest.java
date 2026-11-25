@@ -2,7 +2,6 @@ package ua.edu.sumdu.j2se.clothes;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.function.Executable;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -120,23 +119,13 @@ class ComparatorTest {
     }
 
     @Test
-    void comparatorsShouldBeAnonymousClasses() {
+    void comparatorsShouldNotBeAnonymousClasses() {
         for (int i = 1; i <= ClothesDriver.SORT_CRITERIA; i++) {
             Comparator<Clothes> comparator = ClothesDriver.createComparator(i, store);
-            assertTrue(comparator.getClass().isAnonymousClass());
+            assertFalse(comparator.getClass().isAnonymousClass());
         }
-        assertThrows(IllegalArgumentException.class, new Executable() {
-            @Override
-            public void execute() throws Throwable {
-                ClothesDriver.createComparator(0, store);
-            }
-        });
-        assertThrows(IllegalArgumentException.class, new Executable() {
-            @Override
-            public void execute() throws Throwable {
-                ClothesDriver.createComparator(5, store);
-            }
-        });
+        assertThrows(IllegalArgumentException.class, () -> ClothesDriver.createComparator(0, store));
+        assertThrows(IllegalArgumentException.class, () -> ClothesDriver.createComparator(5, store));
     }
 
     @Test
@@ -146,12 +135,7 @@ class ComparatorTest {
             sortBy(i);
         }
         assertEquals(before, store.getClothes());
-        assertThrows(IllegalArgumentException.class, new Executable() {
-            @Override
-            public void execute() throws Throwable {
-                store.getSortedClothes(null);
-            }
-        });
+        assertThrows(IllegalArgumentException.class, () -> store.getSortedClothes(null));
     }
 
     @Test
