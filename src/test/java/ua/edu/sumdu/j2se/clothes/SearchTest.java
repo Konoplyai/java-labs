@@ -11,11 +11,11 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Тести методів пошуку в драйвері.
+ * Тести методів пошуку в магазині.
  */
 class SearchTest {
 
-    private List<Clothes> items;
+    private Store store;
     private Clothes sweater;
     private Pants trousers;
     private Jeans jeans;
@@ -31,17 +31,17 @@ class SearchTest {
         shirt = new Shirts("Сорочка", "Zara", Size.L, "білий", Material.LINEN, 2024, 999, Sleeve.SHORT, 41);
         formal = new FormalShirt(new Shirts("Сорочка класична", "Arber", Size.L, "блакитний", Material.COTTON,
                 2024, 1499, Sleeve.LONG, 40), true, false);
-        items = new ArrayList<>();
-        items.add(sweater);
-        items.add(trousers);
-        items.add(jeans);
-        items.add(shirt);
-        items.add(formal);
+        store = new Store("Магазин одягу", "м. Суми");
+        store.addNewClothes(sweater, 5);
+        store.addNewClothes(trousers, 3);
+        store.addNewClothes(jeans, 4);
+        store.addNewClothes(shirt, 6);
+        store.addNewClothes(formal, 2);
     }
 
     @Test
     void findByNameShouldIgnoreCaseAndFindPart() {
-        List<Clothes> found = ClothesDriver.findByName(items, "  СОРОЧКА ");
+        List<Clothes> found = store.findByName("  СОРОЧКА ");
         assertEquals(2, found.size());
         assertSame(shirt, found.get(0));
         assertSame(formal, found.get(1));
@@ -49,15 +49,15 @@ class SearchTest {
 
     @Test
     void findByTypeShouldIncludeSubclasses() {
-        assertEquals(2, ClothesDriver.findByType(items, Pants.class).size());
-        assertEquals(1, ClothesDriver.findByType(items, Jeans.class).size());
-        assertEquals(2, ClothesDriver.findByType(items, Shirts.class).size());
-        assertEquals(5, ClothesDriver.findByType(items, Clothes.class).size());
+        assertEquals(2, store.findByType(Pants.class).size());
+        assertEquals(1, store.findByType(Jeans.class).size());
+        assertEquals(2, store.findByType(Shirts.class).size());
+        assertEquals(5, store.findByType(Clothes.class).size());
     }
 
     @Test
     void findByPriceRangeShouldIncludeBorders() {
-        List<Clothes> found = ClothesDriver.findByPriceRange(items, 1299, 1899);
+        List<Clothes> found = store.findByPriceRange(1299, 1899);
         assertEquals(3, found.size());
         assertTrue(found.contains(sweater));
         assertTrue(found.contains(trousers));
@@ -66,25 +66,27 @@ class SearchTest {
 
     @Test
     void findBySizeShouldReturnOnlyThatSize() {
-        assertEquals(2, ClothesDriver.findBySize(items, Size.M).size());
-        assertEquals(3, ClothesDriver.findBySize(items, Size.L).size());
+        assertEquals(2, store.findBySize(Size.M).size());
+        assertEquals(3, store.findBySize(Size.L).size());
     }
 
     @Test
     void emptyResultWhenNothingMatches() {
-        assertTrue(ClothesDriver.findByName(items, "пальто").isEmpty());
-        assertTrue(ClothesDriver.findBySize(items, Size.XXL).isEmpty());
-        assertTrue(ClothesDriver.findByPriceRange(items, 5000, 9000).isEmpty());
-        assertTrue(ClothesDriver.findByName(new ArrayList<>(), "светр").isEmpty());
+        assertTrue(store.findByName("пальто").isEmpty());
+        assertTrue(store.findBySize(Size.XXL).isEmpty());
+        assertTrue(store.findByPriceRange(5000, 9000).isEmpty());
+        assertTrue(new Store("Порожній", "м. Суми").findByName("светр").isEmpty());
     }
 
     @Test
-    void searchShouldNotChangeCollection() {
-        List<Clothes> before = new ArrayList<>(items);
-        ClothesDriver.findByName(items, "о");
-        ClothesDriver.findByType(items, Shirts.class);
-        ClothesDriver.findByPriceRange(items, 0.01, 10000);
-        ClothesDriver.findBySize(items, Size.L);
-        assertEquals(before, items);
+    void searchShouldNotChangeStore() {
+        List<Clothes> before = new ArrayList<>(store.getClothes());
+        int quantity = store.getTotalQuantity();
+        store.findByName("о");
+        store.findByType(Shirts.class);
+        store.findByPriceRange(0.01, 10000);
+        store.findBySize(Size.L);
+        assertEquals(before, store.getClothes());
+        assertEquals(quantity, store.getTotalQuantity());
     }
 }
