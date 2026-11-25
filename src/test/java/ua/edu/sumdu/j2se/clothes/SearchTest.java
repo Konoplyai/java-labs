@@ -24,7 +24,7 @@ class SearchTest {
 
     @BeforeEach
     void setUp() {
-        sweater = new Clothes("Светр", "H&M", Size.L, "сірий", Material.WOOL, 2021, 1299);
+        sweater = new Sweater("Светр", "H&M", Size.L, "сірий", Material.WOOL, 2021, 1299);
         trousers = new Pants("Брюки", "Mango", Size.M, "чорний", Material.WOOL, 2022, 1899, 80, 104);
         jeans = new Jeans(new Pants("Джинси", "Levi's", Size.M, "синій", Material.DENIM, 2023, 2599, 82, 102),
                 Fit.SLIM, 13);

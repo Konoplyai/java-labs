@@ -17,12 +17,12 @@ class ClothesTest {
      * @return одяг з правильними даними
      */
     private Clothes validClothes() {
-        return new Clothes("Джинси", "Levi's", Size.M, "синій", Material.DENIM, 2023, 2199.90);
+        return new Sweater("Джинси", "Levi's", Size.M, "синій", Material.DENIM, 2023, 2199.90);
     }
 
     @Test
     void shouldCreateObjectWithValidData() {
-        Clothes clothes = new Clothes("  Куртка ", "Columbia", Size.XL, "чорний", Material.POLYESTER, 2022, 4599);
+        Clothes clothes = new Sweater("  Куртка ", "Columbia", Size.XL, "чорний", Material.POLYESTER, 2022, 4599);
         assertEquals("Куртка", clothes.getName());
         assertEquals(Size.XL, clothes.getSize());
         assertEquals(2022, clothes.getReleaseYear());
@@ -32,15 +32,15 @@ class ClothesTest {
     @Test
     void shouldThrowExceptionWhenInvalidConstructorData() {
         assertThrows(InvalidClothesException.class,
-                () -> new Clothes("", "Levi's", Size.M, "синій", Material.DENIM, 2023, 100));
+                () -> new Sweater("", "Levi's", Size.M, "синій", Material.DENIM, 2023, 100));
         assertThrows(InvalidClothesException.class,
-                () -> new Clothes("Джинси", null, Size.M, "синій", Material.DENIM, 2023, 100));
+                () -> new Sweater("Джинси", null, Size.M, "синій", Material.DENIM, 2023, 100));
         assertThrows(InvalidClothesException.class,
-                () -> new Clothes("Джинси", "Levi's", null, "синій", Material.DENIM, 2023, 100));
+                () -> new Sweater("Джинси", "Levi's", null, "синій", Material.DENIM, 2023, 100));
         assertThrows(InvalidClothesException.class,
-                () -> new Clothes("Джинси", "Levi's", Size.M, "синій", Material.DENIM, 1800, 100));
+                () -> new Sweater("Джинси", "Levi's", Size.M, "синій", Material.DENIM, 1800, 100));
         assertThrows(InvalidClothesException.class,
-                () -> new Clothes("Джинси", "Levi's", Size.M, "синій", Material.DENIM, 2023, -5));
+                () -> new Sweater("Джинси", "Levi's", Size.M, "синій", Material.DENIM, 2023, -5));
     }
 
     @Test

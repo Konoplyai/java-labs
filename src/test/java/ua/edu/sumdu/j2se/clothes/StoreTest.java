@@ -23,7 +23,7 @@ class StoreTest {
     @BeforeEach
     void setUp() {
         store = new Store("Магазин одягу", "м. Суми");
-        sweater = new Clothes("Светр", "H&M", Size.L, "сірий", Material.WOOL, 2021, 1299);
+        sweater = new Sweater("Светр", "H&M", Size.L, "сірий", Material.WOOL, 2021, 1299);
         trousers = new Pants("Брюки", "Mango", Size.M, "чорний", Material.WOOL, 2022, 1899, 80, 104);
     }
 
@@ -49,7 +49,7 @@ class StoreTest {
     @Test
     void addingSameItemShouldIncreaseQuantity() {
         store.addNewClothes(sweater, 5);
-        Clothes sameSweater = new Clothes("Светр", "H&M", Size.L, "сірий", Material.WOOL, 2021, 1299);
+        Clothes sameSweater = new Sweater("Светр", "H&M", Size.L, "сірий", Material.WOOL, 2021, 1299);
         assertFalse(store.addNewClothes(sameSweater, 2));
         assertEquals(1, store.size());
         assertEquals(7, store.getQuantity(sweater));
@@ -59,7 +59,7 @@ class StoreTest {
     @Test
     void differentPriceOrTypeShouldBeNewItem() {
         store.addNewClothes(sweater, 1);
-        store.addNewClothes(new Clothes("Светр", "H&M", Size.L, "сірий", Material.WOOL, 2021, 1399), 1);
+        store.addNewClothes(new Sweater("Светр", "H&M", Size.L, "сірий", Material.WOOL, 2021, 1399), 1);
         store.addNewClothes(new Pants(sweater, 80, 104), 1);
         assertEquals(3, store.size());
     }
