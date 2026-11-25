@@ -102,7 +102,7 @@ public class ClothesDriver {
      * Виводить інформаційну шапку програми.
      */
     public static void printHeader() {
-        System.out.println("Практична робота №11, варіант 1 (магазин одягу)");
+        System.out.println("Практична робота №13, варіант 1 (магазин одягу, сортування)");
         System.out.println("Виконав: Конопля Іван, група Ін-42/1");
     }
 
@@ -119,8 +119,9 @@ public class ClothesDriver {
             System.out.println("1. Пошук товару");
             System.out.println("2. Додати товар");
             System.out.println("3. Вивести всі товари");
-            System.out.println("4. Завершити роботу");
-            int choice = readInt(scanner, "Ваш вибір: ", 1, 4);
+            System.out.println("4. Вивести відсортовану інформацію про всі товари");
+            System.out.println("5. Завершити роботу");
+            int choice = readInt(scanner, "Ваш вибір: ", 1, 5);
             switch (choice) {
                 case 1:
                     searchMenu(scanner, store);
@@ -130,6 +131,9 @@ public class ClothesDriver {
                     break;
                 case 3:
                     printAll(store);
+                    break;
+                case 4:
+                    printSorted(store);
                     break;
                 default:
                     System.out.println("Роботу завершено.");
@@ -191,7 +195,8 @@ public class ClothesDriver {
         System.out.println("  3. Джинси");
         System.out.println("  4. Сорочки (разом з класичними)");
         System.out.println("  5. Класичні сорочки");
-        int type = readInt(scanner, "  тип: ", 1, 5);
+        System.out.println("  6. Светри");
+        int type = readInt(scanner, "  тип: ", 1, 6);
         switch (type) {
             case 2:
                 return Pants.class;
@@ -201,6 +206,8 @@ public class ClothesDriver {
                 return Shirts.class;
             case 5:
                 return FormalShirt.class;
+            case 6:
+                return Sweater.class;
             default:
                 return Clothes.class;
         }
@@ -252,7 +259,7 @@ public class ClothesDriver {
      */
     public static void createObject(Scanner scanner, Store store) {
         System.out.println("Оберіть тип:");
-        System.out.println("1. Одяг");
+        System.out.println("1. Светр");
         System.out.println("2. Штани");
         System.out.println("3. Джинси");
         System.out.println("4. Сорочка");
@@ -266,7 +273,7 @@ public class ClothesDriver {
             Clothes clothes;
             switch (type) {
                 case 1:
-                    clothes = readClothes(scanner);
+                    clothes = new Sweater(readClothes(scanner));
                     break;
                 case 2:
                     clothes = readPants(scanner);
@@ -377,10 +384,11 @@ public class ClothesDriver {
     }
 
     /**
-     * Зчитує з клавіатури дані однієї речі.
+     * Зчитує з клавіатури спільні поля одягу. Оскільки Clothes абстрактний, поля
+     * зберігаються в об'єкті Sweater, з якого їх копіюють конструктори інших класів.
      *
      * @param scanner сканер
-     * @return створений об'єкт одягу
+     * @return об'єкт зі спільними полями
      * @throws InvalidClothesException якщо дані не пройшли перевірку в класі Clothes
      */
     public static Clothes readClothes(Scanner scanner) {
@@ -391,7 +399,27 @@ public class ClothesDriver {
         Material material = readMaterial(scanner, "  матеріал (" + Material.list() + "): ");
         int year = readInt(scanner, "  рік випуску: ", Clothes.MIN_YEAR, Year.now().getValue());
         double price = readPrice(scanner, "  ціна, грн: ");
-        return new Clothes(name, brand, size, color, material, year, price);
+        return new Sweater(name, brand, size, color, material, year, price);
+    }
+
+    /**
+     * Виводить усі товари магазину, відсортовані за назвою (через Comparable).
+     * Сортується копія списку, порядок товарів у магазині не змінюється.
+     *
+     * @param store магазин
+     */
+    public static void printSorted(Store store) {
+        if (store.isEmpty()) {
+            System.out.println("У магазині немає товарів.");
+            return;
+        }
+        List<Clothes> sorted = store.getSortedClothes();
+        System.out.println("Товари, відсортовані за назвою:");
+        for (int i = 0; i < sorted.size(); i++) {
+            Clothes clothes = sorted.get(i);
+            System.out.println((i + 1) + ". " + clothes.getName() + " - " + clothes.getType() + ": " + clothes
+                    + ", " + store.getQuantity(clothes) + " шт.");
+        }
     }
 
     /**

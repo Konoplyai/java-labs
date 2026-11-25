@@ -104,6 +104,18 @@ public class Store {
     }
 
     /**
+     * Повертає новий список усіх товарів, відсортований за назвою (див. {@link Clothes#compareTo(Clothes)}).
+     * Порядок товарів у самому магазині не змінюється.
+     *
+     * @return відсортований список товарів
+     */
+    public List<Clothes> getSortedClothes() {
+        List<Clothes> sorted = new ArrayList<>(clothes);
+        Collections.sort(sorted);
+        return sorted;
+    }
+
+    /**
      * Повертає кількість різних товарів (позицій).
      *
      * @return кількість позицій
