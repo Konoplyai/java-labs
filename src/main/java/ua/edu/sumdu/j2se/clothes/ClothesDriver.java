@@ -36,6 +36,7 @@ public class ClothesDriver {
             System.out.println();
             System.out.println("Усі речі:");
             printAll(wardrobe);
+            printDuplicates(wardrobe);
         } catch (IllegalStateException e) {
             System.out.println();
             System.out.println("Помилка: " + e.getMessage() + ".");
@@ -79,6 +80,26 @@ public class ClothesDriver {
     public static void printAll(Clothes[] wardrobe) {
         for (int i = 0; i < wardrobe.length; i++) {
             System.out.println((i + 1) + ". " + wardrobe[i]);
+        }
+    }
+
+    /**
+     * Шукає однакові речі в масиві за допомогою equals() і виводить їх номери.
+     *
+     * @param wardrobe масив одягу
+     */
+    public static void printDuplicates(Clothes[] wardrobe) {
+        boolean found = false;
+        for (int i = 0; i < wardrobe.length; i++) {
+            for (int j = i + 1; j < wardrobe.length; j++) {
+                if (wardrobe[i].equals(wardrobe[j])) {
+                    System.out.println("Однакові речі: " + (i + 1) + " і " + (j + 1));
+                    found = true;
+                }
+            }
+        }
+        if (!found) {
+            System.out.println("Однакових речей немає.");
         }
     }
 
