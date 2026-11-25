@@ -105,7 +105,7 @@ public class ClothesDriver {
      * Виводить інформаційну шапку програми.
      */
     public static void printHeader() {
-        System.out.println("Практична робота №15, варіант 1 (магазин одягу, лямбда-вирази)");
+        System.out.println("Практична робота №16, варіант 1 (магазин одягу, UUID)");
         System.out.println("Виконав: Конопля Іван, група Ін-42/1");
     }
 
@@ -248,8 +248,13 @@ public class ClothesDriver {
             System.out.println("2. Типом");
             System.out.println("3. Діапазоном ціни");
             System.out.println("4. Розміром");
+            System.out.println("5. UUID");
             System.out.println("0. Повернутися до головного меню");
-            int choice = readInt(scanner, "Критерій: ", 0, 4);
+            int choice = readInt(scanner, "Критерій: ", 0, 5);
+            if (choice == 5) {
+                searchByUuid(store, readText(scanner, "  UUID: "));
+                continue;
+            }
             List<Clothes> found;
             switch (choice) {
                 case 1:
@@ -270,6 +275,30 @@ public class ClothesDriver {
                     return;
             }
             printSearchResult(store, found);
+        }
+    }
+
+    /**
+     * Шукає товар за UUID, введеним рядком, і виводить повну інформацію про нього.
+     * Некоректний формат UUID не зупиняє програму, а виводиться повідомлення.
+     *
+     * @param store магазин
+     * @param text введений UUID
+     * @return знайдений товар або null
+     */
+    public static Clothes searchByUuid(Store store, String text) {
+        try {
+            Clothes found = store.findByUuid(Identifiable.parseUuid(text));
+            if (found == null) {
+                System.out.println("Товар з UUID " + text.trim() + " не знайдено.");
+            } else {
+                System.out.println("Знайдено: " + found.getType() + ": " + found + ", в наявності "
+                        + store.getQuantity(found) + " шт.");
+            }
+            return found;
+        } catch (IllegalArgumentException e) {
+            System.out.println("Помилка: " + e.getMessage() + ".");
+            return null;
         }
     }
 

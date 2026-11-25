@@ -4,13 +4,15 @@ import java.text.Collator;
 import java.time.Year;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.UUID;
 
 /**
  * Одяг: назва, бренд, розмір, колір, матеріал, рік випуску та ціна.
  * Клас абстрактний: створюються лише об'єкти конкретних класів (Sweater, Pants, Jeans, Shirts, FormalShirt).
  * Об'єкти порівнюються за назвою за українським алфавітом (інтерфейс Comparable).
+ * Кожен об'єкт під час створення отримує унікальний UUID (інтерфейс Identifiable).
  */
-public abstract class Clothes implements Comparable<Clothes> {
+public abstract class Clothes implements Comparable<Clothes>, Identifiable {
 
     /** Найменший допустимий рік випуску. */
     public static final int MIN_YEAR = 1950;
@@ -30,6 +32,7 @@ public abstract class Clothes implements Comparable<Clothes> {
     private Material material;
     private int releaseYear;
     private double price;
+    private UUID uuid = UUID.randomUUID();
 
     /**
      * Створює одяг із заданими параметрами.
@@ -71,6 +74,39 @@ public abstract class Clothes implements Comparable<Clothes> {
         this.material = other.material;
         this.releaseYear = other.releaseYear;
         this.price = other.price;
+    }
+
+    /**
+     * Повертає унікальний ідентифікатор речі. Він створюється автоматично
+     * і не змінюється (після читання з файлу відновлюється збережений).
+     *
+     * @return UUID
+     */
+    @Override
+    public UUID getUuid() {
+        return uuid;
+    }
+
+    /**
+     * Відновлює UUID, збережений у файлі. Використовується лише під час читання файлів.
+     *
+     * @param uuid збережений UUID
+     * @throws InvalidClothesException якщо uuid дорівнює null
+     */
+    void restoreUuid(UUID uuid) {
+        if (uuid == null) {
+            throw new InvalidClothesException("UUID не задано");
+        }
+        this.uuid = uuid;
+    }
+
+    /**
+     * Повертає короткий опис для списків: тип, назва і UUID.
+     *
+     * @return короткий опис
+     */
+    public String getShortInfo() {
+        return getType() + ": " + name + " | UUID: " + uuid;
     }
 
     /**
@@ -271,6 +307,15 @@ public abstract class Clothes implements Comparable<Clothes> {
     }
 
     /**
+     * Повертає UUID у форматі для toString() (додається в кінці опису).
+     *
+     * @return рядок ", uuid=..."
+     */
+    protected String uuidInfo() {
+        return ", uuid=" + uuid;
+    }
+
+    /**
      * Повертає спільні для всього одягу поля одним рядком.
      * Використовується в toString() цього класу і класів-нащадків.
      *
@@ -307,14 +352,15 @@ public abstract class Clothes implements Comparable<Clothes> {
         if (result == 0) {
             result = Double.compare(price, other.price);
         }
-        if (result == 0) {
+        if (result == 0 && !equals(other)) {
             result = toString().compareTo(other.toString());
         }
         return result;
     }
 
     /**
-     * Порівнює одяг за всіма полями.
+     * Порівнює одяг за всіма полями. UUID не враховується, тому однакові речі,
+     * створені окремо, вважаються однаковим товаром.
      *
      * @param o об'єкт для порівняння
      * @return true, якщо всі поля однакові

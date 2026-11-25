@@ -106,7 +106,7 @@ public class TextFileStorage implements ClothesStorage {
             Files.copy(file, Paths.get(file + BACKUP_SUFFIX), StandardCopyOption.REPLACE_EXISTING);
         }
         List<String> lines = new ArrayList<>();
-        lines.add(COMMENT + " тип;назва;бренд;розмір;колір;матеріал;рік;ціна;додаткові поля типу;кількість");
+        lines.add(COMMENT + " тип;назва;бренд;розмір;колір;матеріал;рік;ціна;додаткові поля типу;uuid;кількість");
         for (Clothes clothes : store.getClothes()) {
             lines.add(formatLine(clothes) + SEPARATOR + store.getQuantity(clothes));
         }

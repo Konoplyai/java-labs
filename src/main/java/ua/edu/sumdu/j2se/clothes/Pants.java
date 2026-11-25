@@ -127,7 +127,7 @@ public class Pants extends Clothes {
      */
     @Override
     public String toString() {
-        return "Pants{" + baseInfo() + ", талія=" + waist + " см, довжина=" + length + " см}";
+        return "Pants{" + baseInfo() + ", талія=" + waist + " см, довжина=" + length + " см" + uuidInfo() + "}";
     }
 
     /**

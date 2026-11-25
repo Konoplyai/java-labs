@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Магазин одягу. Зберігає товари в ArrayList, а кількість кожного товару
@@ -69,6 +70,9 @@ public class Store {
         }
         int index = clothes.indexOf(cl);
         if (index == -1) {
+            if (findByUuid(cl.getUuid()) != null) {
+                throw new InvalidClothesException("товар з UUID " + cl.getUuid() + " уже є в магазині");
+            }
             clothes.add(cl);
             quantities.add(quantity);
             return true;
@@ -251,6 +255,21 @@ public class Store {
             total += clothes.get(i).getPrice() * quantities.get(i);
         }
         return total;
+    }
+
+    /**
+     * Шукає товар за UUID.
+     *
+     * @param uuid ідентифікатор
+     * @return знайдений товар або null, якщо такого немає
+     */
+    public Clothes findByUuid(UUID uuid) {
+        for (Clothes item : clothes) {
+            if (item.getUuid().equals(uuid)) {
+                return item;
+            }
+        }
+        return null;
     }
 
     /**

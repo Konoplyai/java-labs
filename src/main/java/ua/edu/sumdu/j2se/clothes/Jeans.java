@@ -151,7 +151,7 @@ public class Jeans extends Pants {
     @Override
     public String toString() {
         return "Jeans{" + baseInfo() + ", талія=" + getWaist() + " см, довжина=" + getLength()
-                + " см, крій=" + fit.getTitle() + ", денім=" + density + " oz (" + getDensityKind() + ")}";
+                + " см, крій=" + fit.getTitle() + ", денім=" + density + " oz (" + getDensityKind() + ")" + uuidInfo() + "}";
     }
 
     /**

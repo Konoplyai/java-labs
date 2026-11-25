@@ -64,6 +64,7 @@ public final class ClothesRecord {
         for (String key : extra) {
             keys.add(key);
         }
+        keys.add("uuid");
         return keys;
     }
 
@@ -103,6 +104,7 @@ public final class ClothesRecord {
             values.add(String.valueOf(formal.hasCufflinks()));
             values.add(String.valueOf(formal.isNonIron()));
         }
+        values.add(clothes.getUuid().toString());
         return values;
     }
 
@@ -128,21 +130,36 @@ public final class ClothesRecord {
         Clothes base = new Sweater(values.get(1), values.get(2), Size.fromString(values.get(3)),
                 values.get(4), Material.fromString(values.get(5)),
                 parseInt(values.get(6), "year"), parseDouble(values.get(7), "price"));
+        Clothes result;
         switch (type) {
             case "Pants":
-                return new Pants(base, parseInt(values.get(8), "waist"), parseInt(values.get(9), "length"));
+                result = new Pants(base, parseInt(values.get(8), "waist"), parseInt(values.get(9), "length"));
+                break;
             case "Jeans":
                 Pants pants = new Pants(base, parseInt(values.get(8), "waist"), parseInt(values.get(9), "length"));
-                return new Jeans(pants, Fit.fromString(values.get(10)), parseInt(values.get(11), "density"));
+                result = new Jeans(pants, Fit.fromString(values.get(10)), parseInt(values.get(11), "density"));
+                break;
             case "Shirts":
-                return new Shirts(base, Sleeve.fromString(values.get(8)), parseInt(values.get(9), "collar"));
+                result = new Shirts(base, Sleeve.fromString(values.get(8)), parseInt(values.get(9), "collar"));
+                break;
             case "FormalShirt":
                 Shirts shirts = new Shirts(base, Sleeve.fromString(values.get(8)), parseInt(values.get(9), "collar"));
-                return new FormalShirt(shirts, parseBoolean(values.get(10), "cufflinks"),
+                result = new FormalShirt(shirts, parseBoolean(values.get(10), "cufflinks"),
                         parseBoolean(values.get(11), "nonIron"));
+                break;
             default:
-                return base;
+                result = base;
+                break;
         }
+        String uuidText = values.get(values.size() - 1).trim();
+        if (!uuidText.isEmpty()) {
+            try {
+                result.restoreUuid(Identifiable.parseUuid(uuidText));
+            } catch (IllegalArgumentException e) {
+                throw new InvalidClothesException(e.getMessage());
+            }
+        }
+        return result;
     }
 
     /**
