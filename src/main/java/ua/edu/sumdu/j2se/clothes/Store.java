@@ -60,6 +60,7 @@ public class Store {
      * @return true, якщо додано новий товар; false, якщо збільшено кількість наявного
      * @throws InvalidClothesException якщо товар null, кількість некоректна
      *                                 або загальна кількість перевищить {@link #MAX_QUANTITY}
+     * @throws DuplicateObjectException якщо інший товар з таким самим UUID уже є в магазині
      */
     public boolean addNewClothes(Clothes cl, int quantity) {
         if (cl == null) {
@@ -71,7 +72,7 @@ public class Store {
         int index = clothes.indexOf(cl);
         if (index == -1) {
             if (findByUuid(cl.getUuid()) != null) {
-                throw new InvalidClothesException("товар з UUID " + cl.getUuid() + " уже є в магазині");
+                throw new DuplicateObjectException("товар з UUID " + cl.getUuid() + " уже є в магазині");
             }
             clothes.add(cl);
             quantities.add(quantity);
@@ -91,20 +92,20 @@ public class Store {
      *
      * @param existingObject товар, який треба змінити
      * @param newObject нові дані товару (може бути іншого класу ієрархії)
-     * @return true, якщо оновлення виконано; false, якщо такого товару немає в магазині
-     * @throws InvalidClothesException якщо нові дані не задано або такий товар уже є в магазині
+     * @return true, якщо оновлення виконано
+     * @throws InvalidClothesException якщо нові дані не задано
+     * @throws ObjectNotFoundException якщо товару existingObject немає в магазині
+     * @throws DuplicateObjectException якщо після зміни товар збігся б з іншим товаром магазину
      */
     public boolean update(Clothes existingObject, Clothes newObject) {
         if (newObject == null) {
             throw new InvalidClothesException("нові дані товару не задано");
         }
-        int index = clothes.indexOf(existingObject);
-        if (index == -1) {
-            return false;
-        }
+        int index = indexOfExisting(existingObject);
         for (int i = 0; i < clothes.size(); i++) {
             if (i != index && clothes.get(i).equals(newObject)) {
-                throw new InvalidClothesException("такий товар уже є в магазині");
+                throw new DuplicateObjectException("товар \"" + newObject.getName()
+                        + "\" з такими даними вже є в магазині");
             }
         }
         newObject.restoreUuid(clothes.get(index).getUuid());
@@ -116,13 +117,11 @@ public class Store {
      * Видаляє товар з магазину разом з усією його кількістю.
      *
      * @param existingObject товар, який треба видалити (шукається через equals)
-     * @return true, якщо товар видалено; false, якщо такого товару немає в магазині
+     * @return true, якщо товар видалено
+     * @throws ObjectNotFoundException якщо такого товару немає в магазині
      */
     public boolean delete(Clothes existingObject) {
-        int index = clothes.indexOf(existingObject);
-        if (index == -1) {
-            return false;
-        }
+        int index = indexOfExisting(existingObject);
         clothes.remove(index);
         quantities.remove(index);
         return true;
@@ -133,7 +132,8 @@ public class Store {
      *
      * @param cl товар
      * @param quantity нова кількість, від 1 до {@link #MAX_QUANTITY}
-     * @throws InvalidClothesException якщо товару немає в магазині або кількість некоректна
+     * @throws ObjectNotFoundException якщо товару немає в магазині
+     * @throws InvalidClothesException якщо кількість некоректна
      */
     public void setQuantity(Clothes cl, int quantity) {
         int index = indexOfExisting(cl);
@@ -148,12 +148,12 @@ public class Store {
      *
      * @param cl товар
      * @return індекс у списку
-     * @throws InvalidClothesException якщо такого товару немає
+     * @throws ObjectNotFoundException якщо такого товару немає
      */
     private int indexOfExisting(Clothes cl) {
         int index = clothes.indexOf(cl);
         if (index == -1) {
-            throw new InvalidClothesException("такого товару немає в магазині");
+            throw new ObjectNotFoundException(cl);
         }
         return index;
     }

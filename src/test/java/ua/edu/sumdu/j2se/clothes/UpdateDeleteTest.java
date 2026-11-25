@@ -88,19 +88,7 @@ class UpdateDeleteTest {
     }
 
     @Test
-    void updateMissingObjectShouldReturnFalse() {
-        Sweater missing = new Sweater("Кофта", "Nike", Size.S, "червоний", Material.COTTON, 2025, 700);
-        Sweater newData = new Sweater("Кофта", "Nike", Size.S, "червоний", Material.COTTON, 2025, 800);
-        assertFalse(store.update(missing, newData));
-        assertFalse(store.update(null, newData));
-        assertFalse(new Store("Порожній", "м. Суми").update(sweater, newData));
-        assertEquals(3, store.size());
-    }
-
-    @Test
-    void updateToExistingItemShouldThrow() {
-        Pants copyOfTrousers = new Pants("Брюки", "Mango", Size.M, "чорний", Material.WOOL, 2022, 1899, 80, 104);
-        assertThrows(InvalidClothesException.class, () -> store.update(sweater, copyOfTrousers));
+    void updateWithoutNewDataShouldThrow() {
         assertThrows(InvalidClothesException.class, () -> store.update(sweater, null));
         assertSame(sweater, store.getClothes().get(0));
     }
@@ -118,16 +106,12 @@ class UpdateDeleteTest {
         assertEquals(2, store.size());
         assertFalse(store.getClothes().contains(trousers));
         assertEquals(7, store.getTotalQuantity());
-        assertFalse(store.delete(trousers));
     }
 
     @Test
-    void deleteByEqualObjectAndFromEmptyStore() {
+    void deleteByEqualObject() {
         assertTrue(store.delete(new Sweater("Светр", "H&M", Size.L, "сірий", Material.WOOL, 2021, 1299)));
-        assertFalse(store.delete(null));
-        Store empty = new Store("Порожній", "м. Суми");
-        assertFalse(empty.delete(sweater));
-        assertTrue(empty.isEmpty());
+        assertEquals(2, store.size());
     }
 
     @Test

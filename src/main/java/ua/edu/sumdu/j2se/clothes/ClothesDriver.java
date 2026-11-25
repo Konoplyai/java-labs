@@ -105,7 +105,7 @@ public class ClothesDriver {
      * Виводить інформаційну шапку програми.
      */
     public static void printHeader() {
-        System.out.println("Практична робота №17, варіант 1 (магазин одягу, модифікація і видалення)");
+        System.out.println("Практична робота №18, варіант 1 (магазин одягу, власні винятки)");
         System.out.println("Виконав: Конопля Іван, група Ін-42/1");
     }
 
@@ -127,29 +127,46 @@ public class ClothesDriver {
             System.out.println("6. Вивести відсортовану інформацію про всі товари");
             System.out.println("7. Завершити роботу");
             int choice = readInt(scanner, "Ваш вибір: ", 1, 7);
-            switch (choice) {
-                case 1:
-                    searchMenu(scanner, store);
-                    break;
-                case 2:
-                    createObject(scanner, store);
-                    break;
-                case 3:
-                    modifyObject(scanner, store);
-                    break;
-                case 4:
-                    deleteObject(scanner, store);
-                    break;
-                case 5:
-                    printAll(store);
-                    break;
-                case 6:
-                    sortMenu(scanner, store);
-                    break;
-                default:
-                    System.out.println("Роботу завершено.");
-                    return;
+            if (choice == 7) {
+                System.out.println("Роботу завершено.");
+                return;
             }
+            try {
+                runMenuItem(choice, scanner, store);
+            } catch (InvalidClothesException | StoreException e) {
+                System.out.println("Помилка: " + e.getMessage() + ". Повернення до головного меню.");
+            }
+        }
+    }
+
+    /**
+     * Виконує вибраний пункт головного меню. Власні винятки, які не обробив сам пункт,
+     * перехоплюються в {@link #runMenu}, тому програма не завершується аварійно.
+     *
+     * @param choice номер пункту від 1 до 6
+     * @param scanner сканер
+     * @param store магазин
+     */
+    private static void runMenuItem(int choice, Scanner scanner, Store store) {
+        switch (choice) {
+            case 1:
+                searchMenu(scanner, store);
+                break;
+            case 2:
+                createObject(scanner, store);
+                break;
+            case 3:
+                modifyObject(scanner, store);
+                break;
+            case 4:
+                deleteObject(scanner, store);
+                break;
+            case 5:
+                printAll(store);
+                break;
+            default:
+                sortMenu(scanner, store);
+                break;
         }
     }
 
@@ -217,12 +234,9 @@ public class ClothesDriver {
             }
             values.set(choice, readAttribute(scanner, keys.get(choice)));
             Clothes updated = ClothesRecord.fromValues(values);
-            if (store.update(item, updated)) {
-                System.out.println("Товар змінено: " + updated.getType() + ": " + updated);
-            } else {
-                System.out.println("Товар не знайдено в магазині, зміни не збережено.");
-            }
-        } catch (InvalidClothesException e) {
+            store.update(item, updated);
+            System.out.println("Товар змінено: " + updated.getType() + ": " + updated);
+        } catch (InvalidClothesException | StoreException e) {
             System.out.println("Помилка: " + e.getMessage() + ". Зміни не збережено.");
         }
     }
@@ -351,10 +365,11 @@ public class ClothesDriver {
             System.out.println("Видалення скасовано.");
             return;
         }
-        if (store.delete(item)) {
+        try {
+            store.delete(item);
             System.out.println("Товар \"" + item.getName() + "\" видалено з магазину.");
-        } else {
-            System.out.println("Товар не знайдено в магазині.");
+        } catch (ObjectNotFoundException e) {
+            System.out.println("Помилка: " + e.getMessage() + ".");
         }
     }
 
@@ -535,7 +550,7 @@ public class ClothesDriver {
             }
             int quantity = readInt(scanner, "  кількість, шт.: ", 1, Store.MAX_QUANTITY);
             addToStore(store, clothes, quantity);
-        } catch (InvalidClothesException e) {
+        } catch (InvalidClothesException | StoreException e) {
             System.out.println("Помилка: " + e.getMessage() + ". Об'єкт не створено.");
         }
     }

@@ -102,7 +102,7 @@ class UuidTest {
     void differentItemWithSameUuidShouldBeRejected() {
         Sweater other = new Sweater("Кофта", "Nike", Size.S, "червоний", Material.COTTON, 2025, 700);
         other.restoreUuid(sweater.getUuid());
-        assertThrows(InvalidClothesException.class, () -> store.addNewClothes(other, 1));
+        assertThrows(DuplicateObjectException.class, () -> store.addNewClothes(other, 1));
         assertEquals(2, store.size());
     }
 
