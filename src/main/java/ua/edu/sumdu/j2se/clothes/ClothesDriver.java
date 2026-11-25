@@ -105,7 +105,7 @@ public class ClothesDriver {
      * Виводить інформаційну шапку програми.
      */
     public static void printHeader() {
-        System.out.println("Практична робота №14, варіант 1 (магазин одягу, сортування за критеріями)");
+        System.out.println("Практична робота №15, варіант 1 (магазин одягу, лямбда-вирази)");
         System.out.println("Виконав: Конопля Іван, група Ін-42/1");
     }
 
@@ -123,8 +123,10 @@ public class ClothesDriver {
             System.out.println("2. Додати товар");
             System.out.println("3. Вивести всі товари");
             System.out.println("4. Вивести відсортовану інформацію про всі товари");
-            System.out.println("5. Завершити роботу");
-            int choice = readInt(scanner, "Ваш вибір: ", 1, 5);
+            System.out.println("5. Редагувати товар");
+            System.out.println("6. Видалити товар");
+            System.out.println("7. Завершити роботу");
+            int choice = readInt(scanner, "Ваш вибір: ", 1, 7);
             switch (choice) {
                 case 1:
                     searchMenu(scanner, store);
@@ -138,10 +140,95 @@ public class ClothesDriver {
                 case 4:
                     sortMenu(scanner, store);
                     break;
+                case 5:
+                    editObject(scanner, store);
+                    break;
+                case 6:
+                    deleteObject(scanner, store);
+                    break;
                 default:
                     System.out.println("Роботу завершено.");
                     return;
             }
+        }
+    }
+
+    /**
+     * Виводить короткий нумерований список товарів і пропонує вибрати один з них.
+     *
+     * @param scanner сканер
+     * @param store магазин
+     * @return вибраний товар або null, якщо товарів немає чи вибрано 0
+     */
+    public static Clothes selectItem(Scanner scanner, Store store) {
+        if (store.isEmpty()) {
+            System.out.println("У магазині немає товарів.");
+            return null;
+        }
+        List<Clothes> items = store.getClothes();
+        System.out.println("Оберіть товар:");
+        for (int i = 0; i < items.size(); i++) {
+            Clothes clothes = items.get(i);
+            System.out.println((i + 1) + ". " + clothes.getType() + ": " + clothes.getName() + ", "
+                    + clothes.getBrand() + ", розмір " + clothes.getSize() + ", "
+                    + String.format("%.2f", clothes.getPrice()) + " грн, " + store.getQuantity(clothes) + " шт.");
+        }
+        System.out.println("0. Повернутися до головного меню");
+        int number = readInt(scanner, "Номер товару: ", 0, items.size());
+        if (number == 0) {
+            return null;
+        }
+        return items.get(number - 1);
+    }
+
+    /**
+     * Редагування товару: можна змінити ціну або кількість.
+     *
+     * @param scanner сканер
+     * @param store магазин
+     */
+    public static void editObject(Scanner scanner, Store store) {
+        Clothes item = selectItem(scanner, store);
+        if (item == null) {
+            return;
+        }
+        System.out.println("Що змінити:");
+        System.out.println("1. Ціну");
+        System.out.println("2. Кількість");
+        System.out.println("0. Повернутися до головного меню");
+        int choice = readInt(scanner, "Ваш вибір: ", 0, 2);
+        try {
+            if (choice == 1) {
+                store.changePrice(item, readPrice(scanner, "  нова ціна, грн: "));
+                System.out.println("Ціну змінено: " + item);
+            } else if (choice == 2) {
+                store.setQuantity(item, readInt(scanner, "  нова кількість, шт.: ", 1, Store.MAX_QUANTITY));
+                System.out.println("Кількість змінено: " + item.getName() + ", " + store.getQuantity(item) + " шт.");
+            }
+        } catch (InvalidClothesException e) {
+            System.out.println("Помилка: " + e.getMessage() + ". Зміни не збережено.");
+        }
+    }
+
+    /**
+     * Видалення товару: користувач вибирає товар і кількість, яку треба прибрати.
+     * Якщо видаляється вся кількість, товар зникає зі списку.
+     *
+     * @param scanner сканер
+     * @param store магазин
+     */
+    public static void deleteObject(Scanner scanner, Store store) {
+        Clothes item = selectItem(scanner, store);
+        if (item == null) {
+            return;
+        }
+        int current = store.getQuantity(item);
+        int quantity = readInt(scanner, "  скільки видалити, шт. (1-" + current + "): ", 1, current);
+        int left = store.removeClothes(item, quantity);
+        if (left == 0) {
+            System.out.println("Товар \"" + item.getName() + "\" видалено з магазину.");
+        } else {
+            System.out.println("Видалено " + quantity + " шт., залишилось " + left + " шт.");
         }
     }
 
@@ -450,48 +537,30 @@ public class ClothesDriver {
     }
 
     /**
-     * Створює компаратор для заданого критерію. Кожен критерій - це окремий анонімний
-     * внутрішній клас, який реалізує Comparator. Якщо за критерієм речі однакові,
-     * вони порівнюються за назвою (compareTo), щоб порядок був однозначним.
+     * Створює компаратор для заданого критерію. Кожен критерій записаний лямбда-виразом.
+     * Якщо за критерієм речі однакові, вони додатково порівнюються за назвою
+     * (thenComparing з compareTo), щоб порядок був однозначним.
      *
      * @param criterion номер критерію від 1 до {@link #SORT_CRITERIA}
      * @param store магазин (потрібен для сортування за кількістю)
      * @return компаратор
      * @throws IllegalArgumentException якщо такого критерію немає
      */
-    public static Comparator<Clothes> createComparator(int criterion, final Store store) {
+    public static Comparator<Clothes> createComparator(int criterion, Store store) {
+        Comparator<Clothes> byName = (o1, o2) -> o1.compareTo(o2);
         switch (criterion) {
             case 1:
-                return new Comparator<Clothes>() {
-                    @Override
-                    public int compare(Clothes o1, Clothes o2) {
-                        return o1.compareTo(o2);
-                    }
-                };
+                return byName;
             case 2:
-                return new Comparator<Clothes>() {
-                    @Override
-                    public int compare(Clothes o1, Clothes o2) {
-                        int result = Double.compare(o1.getPrice(), o2.getPrice());
-                        return result != 0 ? result : o1.compareTo(o2);
-                    }
-                };
+                Comparator<Clothes> byPrice = (o1, o2) -> Double.compare(o1.getPrice(), o2.getPrice());
+                return byPrice.thenComparing(byName);
             case 3:
-                return new Comparator<Clothes>() {
-                    @Override
-                    public int compare(Clothes o1, Clothes o2) {
-                        int result = Integer.compare(o2.getReleaseYear(), o1.getReleaseYear());
-                        return result != 0 ? result : o1.compareTo(o2);
-                    }
-                };
+                Comparator<Clothes> byYear = (o1, o2) -> Integer.compare(o2.getReleaseYear(), o1.getReleaseYear());
+                return byYear.thenComparing(byName);
             case 4:
-                return new Comparator<Clothes>() {
-                    @Override
-                    public int compare(Clothes o1, Clothes o2) {
-                        int result = Integer.compare(store.getQuantity(o2), store.getQuantity(o1));
-                        return result != 0 ? result : o1.compareTo(o2);
-                    }
-                };
+                Comparator<Clothes> byQuantity =
+                        (o1, o2) -> Integer.compare(store.getQuantity(o2), store.getQuantity(o1));
+                return byQuantity.thenComparing(byName);
             default:
                 throw new IllegalArgumentException("немає критерію сортування " + criterion);
         }
