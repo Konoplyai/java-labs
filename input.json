@@ -1,0 +1,64 @@
+[
+  {
+    "type": "Clothes",
+    "name": "Светр",
+    "brand": "H&M",
+    "size": "L",
+    "color": "сірий",
+    "material": "WOOL",
+    "year": 2021,
+    "price": 1299.0
+  },
+  {
+    "type": "Pants",
+    "name": "Брюки",
+    "brand": "Mango",
+    "size": "M",
+    "color": "чорний",
+    "material": "WOOL",
+    "year": 2022,
+    "price": 1899.0,
+    "waist": 80,
+    "length": 104
+  },
+  {
+    "type": "Jeans",
+    "name": "Джинси",
+    "brand": "Levi's",
+    "size": "M",
+    "color": "синій",
+    "material": "DENIM",
+    "year": 2023,
+    "price": 2599.0,
+    "waist": 82,
+    "length": 102,
+    "fit": "SLIM",
+    "density": 13
+  },
+  {
+    "type": "Shirts",
+    "name": "Сорочка",
+    "brand": "Zara",
+    "size": "L",
+    "color": "білий",
+    "material": "LINEN",
+    "year": 2024,
+    "price": 999.0,
+    "sleeve": "SHORT",
+    "collar": 41
+  },
+  {
+    "type": "FormalShirt",
+    "name": "Сорочка класична",
+    "brand": "Arber",
+    "size": "L",
+    "color": "блакитний",
+    "material": "COTTON",
+    "year": 2024,
+    "price": 1499.0,
+    "sleeve": "LONG",
+    "collar": 40,
+    "cufflinks": true,
+    "nonIron": false
+  }
+]

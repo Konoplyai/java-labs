@@ -21,14 +21,15 @@ public class ClothesDriver {
     }
 
     /**
-     * Точка входу в програму. На початку зчитує одяг з файлу input.txt,
-     * під час завершення записує актуальний список назад у файл.
+     * Точка входу в програму. На початку зчитує одяг з файлу,
+     * під час завершення записує актуальний список назад у цей самий файл.
      *
-     * @param args аргументи командного рядка (не використовуються)
+     * @param args якщо перший аргумент "json", використовується файл input.json,
+     *             інакше input.txt
      */
     public static void main(String[] args) {
         printHeader();
-        ClothesStorage storage = new TextFileStorage(TextFileStorage.DEFAULT_FILE);
+        ClothesStorage storage = createStorage(args);
         List<Clothes> items = loadItems(storage);
         Scanner scanner = createScanner();
         try {
@@ -39,6 +40,19 @@ public class ClothesDriver {
         }
         saveItems(storage, items);
         scanner.close();
+    }
+
+    /**
+     * Вибирає сховище за аргументами командного рядка.
+     *
+     * @param args аргументи командного рядка
+     * @return сховище JSON, якщо перший аргумент "json", інакше текстове
+     */
+    public static ClothesStorage createStorage(String[] args) {
+        if (args.length > 0 && args[0].equalsIgnoreCase("json")) {
+            return new JsonFileStorage(JsonFileStorage.DEFAULT_FILE);
+        }
+        return new TextFileStorage(TextFileStorage.DEFAULT_FILE);
     }
 
     /**
