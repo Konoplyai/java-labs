@@ -2,6 +2,10 @@ package ua.edu.sumdu.j2se.clothes;
 
 import java.io.Console;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.sql.SQLException;
 import java.time.Year;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -18,6 +22,8 @@ public class ClothesDriver {
     public static final String STORE_NAME = "Магазин одягу";
     /** Адреса магазину. */
     public static final String STORE_ADDRESS = "м. Суми";
+    /** Файл з командою створення таблиці. */
+    public static final String SCHEMA_FILE = "schema.sql";
 
     /**
      * Закритий конструктор, бо клас містить лише статичні методи.
@@ -26,11 +32,11 @@ public class ClothesDriver {
     }
 
     /**
-     * Точка входу в програму. На початку зчитує товари з файлу в магазин,
-     * під час завершення записує актуальні товари з кількістю назад у цей самий файл.
+     * Точка входу в програму. На початку зчитує товари з файлу в магазин і підключається
+     * до бази даних, під час завершення записує актуальні товари з кількістю назад у файл.
      *
-     * @param args якщо перший аргумент "json", використовується файл input.json,
-     *             інакше input.txt
+     * @param args шлях до файлу з параметрами БД (наприклад, db.properties);
+     *             аргумент "json" вмикає файл input.json замість input.txt
      */
     public static void main(String[] args) {
         printHeader();
@@ -38,9 +44,10 @@ public class ClothesDriver {
         Store store = new Store(STORE_NAME, STORE_ADDRESS);
         System.out.println("Магазин: " + store.getName() + ", " + store.getAddress());
         loadStore(storage, store);
+        DatabaseManager database = connectDatabase(findConfigPath(args));
         Scanner scanner = createScanner();
         try {
-            runMenu(scanner, store);
+            runMenu(scanner, store, database);
         } catch (IllegalStateException e) {
             System.out.println();
             System.out.println("Помилка: " + e.getMessage() + ".");
@@ -53,13 +60,80 @@ public class ClothesDriver {
      * Вибирає сховище за аргументами командного рядка.
      *
      * @param args аргументи командного рядка
-     * @return сховище JSON, якщо перший аргумент "json", інакше текстове
+     * @return сховище JSON, якщо серед аргументів є "json", інакше текстове
      */
     public static ClothesStorage createStorage(String[] args) {
-        if (args.length > 0 && args[0].equalsIgnoreCase("json")) {
-            return new JsonFileStorage(JsonFileStorage.DEFAULT_FILE);
+        for (String arg : args) {
+            if (arg.equalsIgnoreCase("json")) {
+                return new JsonFileStorage(JsonFileStorage.DEFAULT_FILE);
+            }
         }
         return new TextFileStorage(TextFileStorage.DEFAULT_FILE);
+    }
+
+    /**
+     * Шукає серед аргументів шлях до файлу з параметрами БД (файл з розширенням .properties).
+     *
+     * @param args аргументи командного рядка
+     * @return шлях до файлу або null, якщо його не передано
+     */
+    public static String findConfigPath(String[] args) {
+        for (String arg : args) {
+            if (arg.toLowerCase().endsWith(".properties")) {
+                return arg;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Зчитує параметри БД з файлу, перевіряє підключення і створює таблицю, якщо її немає.
+     * Якщо щось не вдалося, виводить повідомлення, а програма працює без бази даних.
+     *
+     * @param configPath шлях до файлу з параметрами або null
+     * @return менеджер бази даних або null, якщо БД недоступна
+     */
+    public static DatabaseManager connectDatabase(String configPath) {
+        if (configPath == null) {
+            System.out.println("Файл з параметрами БД не передано, об'єкти в базу даних не зберігаються.");
+            return null;
+        }
+        try {
+            DatabaseManager database = new DatabaseManager(DatabaseConfig.load(configPath));
+            database.checkConnection();
+            Path schema = Paths.get(SCHEMA_FILE);
+            if (Files.exists(schema)) {
+                database.createTable(schema);
+            }
+            System.out.println("Підключено до БД (" + configPath + "), записів у таблиці "
+                    + DatabaseManager.TABLE + ": " + database.count());
+            return database;
+        } catch (IOException | IllegalArgumentException e) {
+            System.out.println("Не вдалося прочитати параметри БД: " + e.getMessage());
+        } catch (SQLException e) {
+            System.out.println("Не вдалося підключитися до БД: " + e.getMessage());
+        }
+        System.out.println("Програма працює без бази даних.");
+        return null;
+    }
+
+    /**
+     * Зберігає створений об'єкт у базу даних і повідомляє результат.
+     *
+     * @param database менеджер бази даних або null, якщо БД не підключено
+     * @param clothes об'єкт
+     * @param quantity кількість
+     */
+    public static void saveToDatabase(DatabaseManager database, Clothes clothes, int quantity) {
+        if (database == null) {
+            return;
+        }
+        try {
+            int id = database.insert(clothes, quantity);
+            System.out.println("Збережено в БД: id=" + id + ", type=" + clothes.getClass().getSimpleName());
+        } catch (SQLException e) {
+            System.out.println("Помилка збереження в БД: " + e.getMessage());
+        }
     }
 
     /**
@@ -102,7 +176,7 @@ public class ClothesDriver {
      * Виводить інформаційну шапку програми.
      */
     public static void printHeader() {
-        System.out.println("Практична робота №11, варіант 1 (магазин одягу)");
+        System.out.println("Практична робота №12, варіант 1 (магазин одягу, збереження в БД)");
         System.out.println("Виконав: Конопля Іван, група Ін-42/1");
     }
 
@@ -111,8 +185,9 @@ public class ClothesDriver {
      *
      * @param scanner сканер
      * @param store магазин
+     * @param database менеджер бази даних або null, якщо БД не підключено
      */
-    public static void runMenu(Scanner scanner, Store store) {
+    public static void runMenu(Scanner scanner, Store store, DatabaseManager database) {
         while (true) {
             System.out.println();
             System.out.println("Меню:");
@@ -126,7 +201,7 @@ public class ClothesDriver {
                     searchMenu(scanner, store);
                     break;
                 case 2:
-                    createObject(scanner, store);
+                    createObject(scanner, store, database);
                     break;
                 case 3:
                     printAll(store);
@@ -244,13 +319,14 @@ public class ClothesDriver {
     }
 
     /**
-     * Пропонує вибрати тип нового товару, зчитує його дані і кількість та додає в магазин.
-     * Пункт 0 повертає до головного меню без створення об'єкта.
+     * Пропонує вибрати тип нового товару, зчитує його дані і кількість, додає в магазин
+     * і зберігає в базу даних. Пункт 0 повертає до головного меню без створення об'єкта.
      *
      * @param scanner сканер
      * @param store магазин
+     * @param database менеджер бази даних або null, якщо БД не підключено
      */
-    public static void createObject(Scanner scanner, Store store) {
+    public static void createObject(Scanner scanner, Store store, DatabaseManager database) {
         System.out.println("Оберіть тип:");
         System.out.println("1. Одяг");
         System.out.println("2. Штани");
@@ -283,6 +359,7 @@ public class ClothesDriver {
             }
             int quantity = readInt(scanner, "  кількість, шт.: ", 1, Store.MAX_QUANTITY);
             addToStore(store, clothes, quantity);
+            saveToDatabase(database, clothes, quantity);
         } catch (InvalidClothesException e) {
             System.out.println("Помилка: " + e.getMessage() + ". Об'єкт не створено.");
         }
