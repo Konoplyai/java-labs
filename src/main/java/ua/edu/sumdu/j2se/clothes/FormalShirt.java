@@ -128,6 +128,18 @@ public class FormalShirt extends Shirts {
     }
 
     /**
+     * Повертає пораду з догляду за класичною сорочкою:
+     * до поради для матеріалу додається порада щодо прасування.
+     *
+     * @return порада з догляду
+     */
+    @Override
+    public String getCareInstructions() {
+        String ironing = nonIron ? "прасувати не потрібно, сушити на плічках" : "прасувати комір і манжети в першу чергу";
+        return super.getCareInstructions() + "; " + ironing;
+    }
+
+    /**
      * Повертає опис сорочки одним рядком.
      *
      * @return рядок з усіма полями
