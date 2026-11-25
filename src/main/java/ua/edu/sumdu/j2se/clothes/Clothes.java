@@ -1,5 +1,7 @@
 package ua.edu.sumdu.j2se.clothes;
 
+import java.util.Objects;
+
 /**
  * Одяг: назва, бренд, розмір, колір та ціна.
  */
@@ -96,5 +98,48 @@ public class Clothes {
      */
     public void setPrice(double price) {
         this.price = price;
+    }
+
+    /**
+     * Повертає опис одягу одним рядком.
+     *
+     * @return рядок з усіма полями
+     */
+    @Override
+    public String toString() {
+        return "Clothes{назва='" + name + "', бренд='" + brand + "', розмір=" + size
+                + ", колір='" + color + "', ціна=" + String.format("%.2f", price) + " грн}";
+    }
+
+    /**
+     * Порівнює одяг за всіма полями.
+     *
+     * @param o об'єкт для порівняння
+     * @return true, якщо всі поля однакові
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Clothes other = (Clothes) o;
+        return Double.compare(price, other.price) == 0
+                && Objects.equals(name, other.name)
+                && Objects.equals(brand, other.brand)
+                && Objects.equals(size, other.size)
+                && Objects.equals(color, other.color);
+    }
+
+    /**
+     * Хеш-код, узгоджений з equals.
+     *
+     * @return хеш-код
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, brand, size, color, price);
     }
 }
