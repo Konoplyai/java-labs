@@ -1,0 +1,10 @@
+# Maven
+target/
+
+# Compiled classes
+*.class
+
+# IDE
+.idea/
+.vscode/
+*.iml
